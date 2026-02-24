@@ -21,7 +21,7 @@ subroutine fokkerplanck_compute(time, TAU)
     real(wp) xend,h,dt
     real(wp) znak,alfa2,dt0,h0,r
     real(wp), save  :: last_time_saving = 0
-    parameter(dt0=0.1d0,h0=0.1d0)
+    parameter(dt0=0.1d0,h0=0.01d0)
 
     dtstep=TAU/dble(ntau) !seconds 
 
