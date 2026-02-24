@@ -1,0 +1,11 @@
+{
+  "name": "dec25ph-60s2d_2cm",
+  "comment": "t15pam4rbox_2D_correct.dat",
+  "spectrum": {
+    "kind": "scatter_spectrum",
+    "source": "T15dec25ph-60cm2s2deps-6.dat",
+    "coordinate_system": 0,
+    "angle": 0.0,
+    "PWM": true
+  }
+}

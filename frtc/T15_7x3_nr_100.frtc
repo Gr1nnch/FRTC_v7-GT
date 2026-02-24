@@ -32,8 +32,8 @@
     "pchm": 0.2,
     "pabs": 0.01,
     "pgiter": 0.00001,
-    "ni1": 20,
-    "ni2": 20,
+    "ni1": 200,
+    "ni2": 200,
     "niterat": 199,
     "nmaxm_1": 500,
     "nmaxm_2": 50,
@@ -56,7 +56,8 @@
     "fp_solver": 0,
     "traj_len_seved": 10,
     "max_number_of_traj": 500000,
-    "max_size_of_traj": 15000
+    "max_size_of_traj": 15000,
+    "save_interval": 0.001
   },
   "grill_parameters": {
     "Zplus": 34.29,
