@@ -84,10 +84,13 @@ contains
             allocate(temi(N),zeff(N), afld(N), source=0.0_wp)
             allocate(delta(N),ell(N),gamm(N),amy(N), source=0.0_wp)
         end if
+        open(62,file='lhcd/Equil_globgel.dat')
         do i=1, ngrid
+            read(62,*) zatch,ellipc(i),treug(i),sshift(i)
             rh(i)=AMETR(i)/ABC
             rha(i)=RHO(i)/ABC  !/ABC instead of /ROC is not a mistake!
-            delta(i)=(SHIF(1)-SHIF(i))/ABC  !FRTC Shafr. shift. defin.
+            !delta(i)=(SHIF(1)-SHIF(i))/ABC  !FRTC Shafr. shift. defin.
+            delta(i)=(sshift(1)-sshift(i))/ABC  !FRTC Shafr. shift. defin.
             ell(i)=ELON(i)
             gamm(i)=rh(i)*TRIA(i)
             con(i)=NE(i)
@@ -100,6 +103,7 @@ contains
                 afld(i)=UPL(i)/RTOR/GP2 
             endif
         end do
+        close(62)
         rh(ngrid)=1.d0
         rh1=rh(1)          !saving the first ASTRA radial grid element
         rh(1) = 0.0d0         !shifting the first element to zero
