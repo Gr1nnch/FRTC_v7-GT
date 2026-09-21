@@ -154,6 +154,7 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
     use constants
     use approximation
     use plasma
+    use xpoint
     use decrements, only: pdec1,pdec2,pdec3,pdecv,pdecal,dfdv
     use decrements, only: zatukh
     use rt_parameters, only :  nr, itend0, kv, nmaxm, traj_len_seved, save_interval
@@ -163,6 +164,7 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
     implicit none
     
     real(wp), intent(in) :: tview
+    real(wp) :: addx, addz
 
     integer, intent(in) :: ispectr, nnz, ntet  !sav#
 
@@ -323,6 +325,11 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
                 xgm=fdf(xr,cgm,ncoef,xgmp)
                 xx=-xdl+xr*cotet-xgm*sitet**2
                 zz=xr*xly*sitet
+                if(-5.gt.0)then
+                    call xpnt_coord(xr, th + 1.5d0*pi, addx, addz)
+                    xx = -xdl + xr*cotet - xgm*sitet**2 + addx
+                    zz =  xr*xly*sitet + addz
+                end if
                 x=(r0+rm*xx)/1d2
                 z=(z0+rm*zz)/1d2 
                 jdlt=jr-jrc
