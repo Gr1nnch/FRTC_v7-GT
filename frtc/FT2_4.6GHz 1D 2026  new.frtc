@@ -1,15 +1,15 @@
 {
-  "name": "FT2_base",
-  "comment": "base config",
+  "name": "FT2_4.6GHz 1D 2026  new",
+  "comment": "FT2 new 2026 spectrum",
   "physical_parameters": {
-    "freq": 0.92,
-    "xmi1": 1.0,
+    "freq": 4.6,
+    "xmi1": 2.0,
     "zi1": 1.0,
     "xmi2": 16.0,
     "zi2": 8.0,
-    "dni2": 0.0,
-    "xmi3": 12.0,
-    "zi3": 6.0,
+    "dni2": 0.03,
+    "xmi3": 1.0,
+    "zi3": 1.0,
     "dni3": 0.0
   },
   "alphas_parameters": {
@@ -27,7 +27,7 @@
     "hdrob": 1.5,
     "cleft": 0.7,
     "cright": 1.5,
-    "cdel": 0.5,
+    "cdel": 0.25,
     "rbord": 0.999,
     "pchm": 0.2,
     "pabs": 0.01,
@@ -45,26 +45,26 @@
   "options": {
     "ipri": 2,
     "iw": 1,
-    "ismth": 1,
+    "ismth": 0,
     "ismthalf": 0,
-    "ismthout": 1,
-    "inew": -1,
+    "ismthout": 0,
+    "inew": 0,
     "itor": 1,
     "ipol": 1,
-    "upl_fix": true,
+    "upl_fix": false,
     "upl_value": 0.0,
     "fp_solver": 0,
-    "traj_len_seved": 50,
-    "max_number_of_traj": 30000,
-    "max_size_of_traj": 50000,
+    "traj_len_seved": 0,
+    "max_number_of_traj": 300000,
+    "max_size_of_traj": 30000,
     "save_interval": 0.001
   },
   "grill_parameters": {
-    "Zplus": 2.9,
-    "Zminus": -2.9,
+    "Zplus": 0.0,
+    "Zminus": -5.8,
     "ZGapPlus": 0.0,
     "ZGapMinus": 0.0,
-    "ntet": 15,
-    "nnz": 100
+    "ntet": 11,
+    "nnz": 51
   }
 }

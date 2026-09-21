@@ -1,9 +1,9 @@
 {
-  "name": "t15_2D_clone_d46e",
+  "name": "dec25sh560-3-60",
   "comment": "t15pam4rbox_2D_correct.dat",
   "spectrum": {
     "kind": "scatter_spectrum",
-    "source": "t15pam4rbox_2D_correct.dat",
+    "source": "T15dec25sh560-3-60s2deps-6.dat",
     "coordinate_system": 0,
     "angle": 0.0,
     "PWM": true

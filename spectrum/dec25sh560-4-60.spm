@@ -1,9 +1,9 @@
 {
-  "name": "dec25ph00s2d_3cm_linear",
+  "name": "dec25sh560-4-60",
   "comment": "t15pam4rbox_2D_correct.dat",
   "spectrum": {
     "kind": "scatter_spectrum",
-    "source": "2D_ph00_l1_3.dat",
+    "source": "T15dec25sh560-4-60s2deps-6.dat",
     "coordinate_system": 0,
     "angle": 0.0,
     "PWM": true

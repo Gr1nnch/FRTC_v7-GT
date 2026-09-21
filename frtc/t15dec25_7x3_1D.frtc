@@ -1,5 +1,5 @@
 {
-  "name": "t15dec25",
+  "name": "t15dec25_7x3_1D",
   "comment": "T51_R4",
   "physical_parameters": {
     "freq": 2.45,
@@ -43,7 +43,7 @@
     "maxstep4": 5000
   },
   "options": {
-    "ipri": 2,
+    "ipri": 1,
     "iw": 1,
     "ismth": 0,
     "ismthalf": 0,

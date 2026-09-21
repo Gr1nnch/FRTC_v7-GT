@@ -1,0 +1,11 @@
+{
+  "name": "FT2_1D_4.6GH",
+  "comment": "FT2 4.6GHz_2026new Irzak",
+  "spectrum": {
+    "kind": "spectrum_1D",
+    "source": "",
+    "coordinate_system": 1,
+    "angle": 0.0,
+    "PWM": false
+  }
+}

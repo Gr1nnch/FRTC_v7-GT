@@ -1,15 +1,18 @@
 
 !----------------- Times -----------------
 TSTART = 0.011d0;
-TEND = 0.03;
-TINIT = 0.026d0;
+TEND = 0.03250;
+TINIT = 0.02d0;
 !TPAUSE = 0.03d0;
 TSCALE = 0.015d0;
-
+TAUMAX = 1.e-4;
+TAUMIN=1.d-5;
 DROUT = 1.d-4;
 DPOUT = 1.d-4;
 DTOUT = 1.d-5;
 DSTART = 0.026d0;
+
+NEOCL(100)<:;
 
 CF1 = 0.1d-3;
 CF2 = 0.028d0;
@@ -23,6 +26,7 @@ CF11 = 0.15d0;
 !NE = (CF10-CF11)*FPA**CF14+CF11;
 !NE = (CF10+CF11)*EXP(-(CF14+0.4)*(RHO/ROC)**2);
 NE = NEX;
+!NE=(2.2-0.22)*((1-(AMETR/ABC)**2)**1)+0.22;
 
 TE:AS;
 CF12 = 468.0d-3 - 88.0d-3*FRAMP(CF2,CF3);
@@ -30,13 +34,15 @@ CF13 = 30.0d-3 - 7.0d-3*FRAMP(CF2,CF3);
 !TE = (CF12-CF13)*FPA**CF14+CF13;
 !TE = (CF12+CF13 + 0.13*FRAMP(0.030,CF3))*EXP(-(CF14+0.4)*(RHO/ROC)**2);
 TE = TEX;
+!TE=((0.6-0.06)*((1-(AMETR/ABC)**3)**2)+0.06)*1.2;
 !----------------- Ion parametrs -----------------
 
 TI:AS;
 
 !TI = 0.16*(1.d0+0.1d0*FRAMP(0.026,0.034))*FPR**CF14+CF13;
 !TI = 0.265*(1.d0+0.1d0*FRAMP(CF2,CF3))*EXP(-(CF14+0.4)*(RHO/ROC)**2);
-TI = 0.4*TE
+TI = TIX/1000;
+!TI=(0.130-0.013)*((1-(AMETR/ABC)**2)**1.5)+0.013;
 
 !----------------- Impurities -----------------
 
@@ -48,7 +54,7 @@ ZMAIN = ZMJ;
 AIM1 = 16;
 ZIM1 = 8;
 
-ZEF = 2.2d0
+ZEF = 3.5d0
 
 !Its densities
 
@@ -60,7 +66,7 @@ NI = NE*(ZIM1-ZEF)/(ZIM1-ZMJ)/ZMJ;
 
 CU:EQ;
 CU = CUX;
-
+CUBS="work(j,301)";
 
 CAR31 = CNHR + CCMHD;
 CC = CAR31;
@@ -71,7 +77,7 @@ NEQUIL = 41;
 
 !----------------- LHCD & DrivenCurrent -----------------
 
-QLH = 0.054d0;
+QLH = 0.2d0;
 
 debug:0.0001:DSTART::;
 saveprofiles::CF2:CF3:;
@@ -82,24 +88,25 @@ CD = CULH;
 CCD1 = VINT(PELHB);
 CCD2 = IINT(CULHB);
 
-!----------------- Radial output -----------------
-
-J\CU\-1;        Upl\UPL;            Poh\POH\-2;      E\UPL/RTOR/GP2;
-Jlh\CULH\-1;    Te\TE;              CC\CC\-3;        Q\1./MU;
-JBS\CUBS;       Ti\TI;            Plh\PELH\-2;     En\CAR24;
-Johm\CUOHM\8;   Ne\NE;              sig\CAR32\-3;    Chr\CAR31; 
-!----------------- Time output -----------------
-
-Ilh_ILHB_-10;       Qlh_QLH_-5;
-U_UPLB_-2;          Iohm_IOHMB_-10;
-Ux_ZRD2_-2;         IBSB_IBSB;
-Ipl_IPL_-10;        E_UPL/RTOR/GP2_-2;
-NEV_ABS((IPL-ILHB-IOHMB-IBSB));
+!====================   Radial output  =================================
+J\CU\-1;       Plh\PELH;   Johm\CUOHM\8;   E\UPL/(RTOR+AMETR)/GP2;
+Te\TE\\TEX;	Plh2\PELH\-2;   CC\CC\-3;      Q\1./MU;
+Jlh\CULH\-1;   Upl\UPL;    Zef\ZEF\-1;     Poh\POH\-2;
+Ti\TI\\TIX;      Ne\NE\\NEX;    sig\CAR32\-3;    Chr\CAR31; 
+  
 
 
-
-
-
+!====================  Time output  ===================================
+L_LINTB_3;
+IPL_IPL_-21;
+Qpr_ZRD8_-1;
+QLh_QLH_0.15;
+Vexp_ZRD1_2;
+Iohm_IOHMB_-10;
+V_UPLB_2; 
+ICD_ILHB_-21;
+ICDP_ZRD35_2; 
+IBS_IBSB_-21;
 
 
 
