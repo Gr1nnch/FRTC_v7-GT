@@ -21,7 +21,7 @@ subroutine fokkerplanck_compute(time, TAU)
     real(wp) xend,h,dt
     real(wp) znak,alfa2,dt0,h0,r
     real(wp), save  :: last_time_saving = 0
-    parameter(dt0=0.1d0,h0=0.01d0)
+    parameter(dt0=0.1d0,h0=0.1d0)
 
     dtstep=TAU/dble(ntau) !seconds 
 
@@ -45,7 +45,7 @@ subroutine fokkerplanck_compute(time, TAU)
             fokker_planck = FokkerPlanck1D(znak*enorm(j), xend, vij(:,j), fij0(:,j,k))
             call fokker_planck%init_zero_diffusion
             do i=1, ntau
-                call fokker_planck%solve_time_step(dt, nt)
+                call fokker_planck%solve_time_step(dt, nt, time,0)
                 !call fokkerplanck1D_iter(alfa2, h, n, dt, nt, xend, d1, d2, d3, vij(:,j), fij0(:,j,k), out_fj)
             end do
             fij0(:,j,k) = fokker_planck%f
@@ -54,7 +54,7 @@ subroutine fokkerplanck_compute(time, TAU)
             fokker_planck = FokkerPlanck1D(znak*enorm(j), xend, vij(:,j), fij(:,j,k))
             call fokker_planck%init_diffusion(dij(:,j,k))
             do i=1, ntau
-                call fokker_planck%solve_time_step(dt, nt)
+                call fokker_planck%solve_time_step(dt, nt, time,j)
                 !call fokkerplanck1D_iter(alfa2, h, n, dt, nt, xend, d1, d2, d3, vij(:,j), fij(:,j,k),out_fj, dfij(:,j,k))
             end do
             fij(:,j,k) = fokker_planck%f

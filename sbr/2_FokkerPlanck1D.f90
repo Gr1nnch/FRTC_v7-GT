@@ -175,14 +175,16 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
 
     end subroutine
 
-    subroutine FokkerPlanck1D_solve_time_step(this, dt, nt)
+    subroutine FokkerPlanck1D_solve_time_step(this, dt, nt, time,nomer)
         use lock_module
         use rt_parameters, only: fp_solver
         implicit none
         class(FokkerPlanck1D), intent(inout) :: this
         
         integer, intent(in) :: nt
+        integer, intent(in) :: nomer
         real(wp), intent(in)  :: dt
+        real(wp), intent(in) :: time
 
 
         !real*8, intent (inout), optional :: dfj0(:)
@@ -191,7 +193,7 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
         real(wp)  y(this%n+2),x(this%n+2)
         real(wp), dimension(:), allocatable:: fj, dfj,  givi
         integer i, ii, it, ibeg, klo, khi, ierr, klo1, khi1
-        real(wp) shift, ybeg, yend, tend, dff
+        real(wp) shift, ybeg, yend, tend, dff, fff
 
          !!!!!! grid !!!!!!!!!
         !!  shift=h*0.1d0 !0.01d0
@@ -217,7 +219,43 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
         !!!!!!!!!!!!   solve problem   !!!!!!!!!!!!!!!!!!!!!!!!!!
         select case (fp_solver)
         case (0)
+            !if(time.gt.0.303)then 
+                if(nomer.eq.67)then
+                    open(74, file='ybegd67.dat',status='old')
+                    do i=1, this%n+1
+                        read(74,*) fff, this%d1(i),this%d2(i),this%d3(i)
+                    end do
+                    close(74)
+
+                end if
+            !end if
+            if(time.gt.0.3005)then 
+                if(nomer.eq.67)then
+                    open(74, file='lhcd/out/ybegd0.dat')
+                    do i=1, this%n+1
+                        write(74,*) y(i), this%d1(i),this%d2(i),this%d3(i)
+                    end do
+                    close(74)
+
+                end if
+            end if
             call savelyev_solver(this%alfa2, nt, this%h, dt, this%n, ybeg, yend, this%d1, this%d2, this%d3, y)
+            if(time.gt.0.3005)then
+                if(nomer.eq.67)then
+                    open(74, file='lhcd/out/yend.dat')
+                    do i=1, this%n+1
+                        write(74,*) y(i), this%d1(i),this%d2(i),this%d3(i)
+                    end do
+                    close(74)
+                    open(74, file='lhcd/out/nthdt.dat',position="append")
+                    do i=1, this%n+1
+                        write(74,*) nt, this%h,dt,this%n
+                    end do
+                    close(74)
+                    write(*,*)'time=',time
+                    PAUSE
+                end if
+            end if
         case (1)
             call chang_cooper_solver(this%alfa2, nt, this%h, dt, this%n, ybeg, yend, this%d1,this%d2,this%d3, y)
         case DEFAULT
@@ -254,7 +292,7 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
       !if (present(dfj0)) then
       !    call burying_procedure(vj, fj0, dfj0)
       !else 
-      call burying_procedure(this%v, this%f)
+      !call burying_procedure(this%v, this%f)
       !end if
   
   
