@@ -84,13 +84,13 @@ contains
             allocate(temi(N),zeff(N), afld(N), source=0.0_wp)
             allocate(delta(N),ell(N),gamm(N),amy(N), source=0.0_wp)
         end if
-        open(62,file='lhcd/Equil_globgel.dat')
+        !open(62,file='lhcd/Equil_globgel.dat')
         do i=1, ngrid
-            read(62,*) zatch,ellipc(i),treug(i),sshift(i)
+            !read(62,*) zatch,ellipc(i),treug(i),sshift(i)
             rh(i)=AMETR(i)/ABC
             rha(i)=RHO(i)/ABC  !/ABC instead of /ROC is not a mistake!
-            !delta(i)=(SHIF(1)-SHIF(i))/ABC  !FRTC Shafr. shift. defin.
-            delta(i)=(sshift(1)-sshift(i))/ABC  !FRTC Shafr. shift. defin.
+            delta(i)=(SHIF(1)-SHIF(i))/ABC  !FRTC Shafr. shift. defin.
+            !delta(i)=(sshift(1)-sshift(i))/ABC  !FRTC Shafr. shift. defin.
             ell(i)=ELON(i)
             gamm(i)=rh(i)*TRIA(i)
             con(i)=NE(i)
@@ -103,7 +103,7 @@ contains
                 afld(i)=UPL(i)/RTOR/GP2 
             endif
         end do
-        close(62)
+        !close(62)
         rh(ngrid)=1.d0
         rh1=rh(1)          !saving the first ASTRA radial grid element
         rh(1) = 0.0d0         !shifting the first element to zero
@@ -750,8 +750,9 @@ contains
         use maxwell        
         use nr_grid, only: vij, fij, dfij, fij0, dij
         implicit none
-        integer j
+        integer j,i
         real(wp) r, vclt
+        open(74, file='lhcd/out/startMaxwel.dat')
         do j=1,nr
             r=dble(j)/dble(nr+1)
             vclt=3.d10/fvt(r)
@@ -760,7 +761,11 @@ contains
             vij(1:i0,j) = create_vt_grid(vclt)
             call init_fmaxw_classic(vclt,enorm(j),fij(:,j,1),dfij(:,j,1)) ! positive
             call init_fmaxw_ext(vclt,enorm(j),fij(:,j,2),dfij(:,j,2))     ! negative
+            do i=1,i0
+                write(74,*)vij(i,j), fij(i,j,1), fij(i,j,2)
+            end do
           end do
+          close(74)
           fij0(:,:,:)=fij(:,:,:)
           dij(:,:,:)=zero
 
