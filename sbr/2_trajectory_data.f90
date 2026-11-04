@@ -3,7 +3,7 @@ module trajectory_data
     implicit none
 
     type TrajectoryPoint
-        !! тип для хранения точки тректории
+        !! С‚РёРї РґР»СЏ С…СЂР°РЅРµРЅРёСЏ С‚РѕС‡РєРё С‚СЂРµРєС‚РѕСЂРёРё
         real(wp)    :: dland, dcoll, perpn, dalf
         real(wp)    :: vel, tetai
         real(wp)    :: xnpar
@@ -11,11 +11,11 @@ module trajectory_data
         real(wp)    :: vthc, poloidn
         integer     :: izz, iww, jrad
         integer     :: driver 
-        !! value = 2 or 4, где была создана точка в driver2 или driver4 
+        !! value = 2 or 4, РіРґРµ Р±С‹Р»Р° СЃРѕР·РґР°РЅР° С‚РѕС‡РєР° РІ driver2 РёР»Рё driver4 
         integer     :: ipow
     end type TrajectoryPoint
 
-    !integer, parameter :: max_size = 50000
+    integer, parameter :: max_size = 50000
 
     type Trajectory
         integer size
@@ -56,24 +56,23 @@ module trajectory_data
     type(Trajectory), pointer :: current_trajectory
 contains
     subroutine init_method(this, theta, index)
-        !! инициализация траетории
-        use rt_parameters, only: max_size_of_traj
+        !! РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С‚СЂР°РµС‚РѕСЂРёРё
         implicit none
         class(Trajectory), intent(inout) :: this
         real(wp),          intent(in)    :: theta
         integer,           intent(in)    :: index
-        !print *,'инит массива точек:', size(this%points)
+        !print *,'РёРЅРёС‚ РјР°СЃСЃРёРІР° С‚РѕС‡РµРє:', size(this%points)
         if (allocated(this%points)) deallocate(this%points)
         this%tetin = theta
         this%spectrum_point_index = index
         this%size = 0
         this%nrefj = 0
         this%mbad = 0 
-        allocate(this%points(max_size_of_traj))
+        allocate(this%points(max_size))
     end subroutine
 
     subroutine reset_method(this, index)
-        !! сброс счетчика
+        !! СЃР±СЂРѕСЃ СЃС‡РµС‚С‡РёРєР°
         implicit none
         class(Trajectory), intent(inout) :: this
         integer, intent(in) :: index
@@ -81,23 +80,20 @@ contains
     end subroutine
 
     subroutine add_point_method(this, tpoint)
-        !! добавляение новой точнки траектории
-        use rt_parameters, only: max_size_of_traj
+        !! РґРѕР±Р°РІР»СЏРµРЅРёРµ РЅРѕРІРѕР№ С‚РѕС‡РЅРєРё С‚СЂР°РµРєС‚РѕСЂРёРё
         implicit none
         class(Trajectory), intent(inout) :: this
         class(TrajectoryPoint), intent(in) :: tpoint  
         this%size = this%size + 1
-        if (this%size > max_size_of_traj) then
-            print *, 'size of traj=', this%size
-            print *, 'too long trajectory !'
-            print *, 'need to increase max_size_of_traj'
+        if (this%size > max_size) then
+            print *, 'СЃР»РёС€РєРѕРј РјРЅРѕРіРѕ С‚РѕС‡РµРє'
             stop
         end if
         this%points(this%size) = tpoint
     end subroutine
 
     subroutine write_info_method(this, iu)
-        !! сохранение в файл информации о траектории
+        !! СЃРѕС…СЂР°РЅРµРЅРёРµ РІ С„Р°Р№Р» РёРЅС„РѕСЂРјР°С†РёРё Рѕ С‚СЂР°РµРєС‚РѕСЂРёРё
         implicit none
         class(Trajectory), intent(inout) :: this
         integer, intent(in) :: iu

@@ -131,9 +131,9 @@ contains
 
     !sav2008: below this line there are new subroutins and functions
 
-    ! пришлось переименовать из rkqs - почему-то криво линковался
+    ! РїСЂРёС€Р»РѕСЃСЊ РїРµСЂРµРёРјРµРЅРѕРІР°С‚СЊ РёР· rkqs - РїРѕС‡РµРјСѓ-С‚Рѕ РєСЂРёРІРѕ Р»РёРЅРєРѕРІР°Р»СЃСЏ
     subroutine runge_kutta_qs(y, dydx, n, x, htry, eps, yscal, hdid, hnext, derivs)
-        !! метод рунге-кутта         
+        !! РјРµС‚РѕРґ СЂСѓРЅРіРµ-РєСѓС‚С‚Р°         
         implicit none
         real(wp), intent(inout)  :: y(n)
         real(wp), intent(inout)  :: dydx(n)
@@ -183,7 +183,7 @@ contains
     end
   
     subroutine rkck(y,dydx,n,x,h,yout,yerr, derivs)
-        !!  метод рунге-кутта, нужны подробности
+        !!  РјРµС‚РѕРґ СЂСѓРЅРіРµ-РєСѓС‚С‚Р°, РЅСѓР¶РЅС‹ РїРѕРґСЂРѕР±РЅРѕСЃС‚Рё
         implicit none
         real(wp), intent(in)    :: y(n)
         real(wp), intent(in)    :: dydx(n)

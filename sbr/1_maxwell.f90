@@ -1,14 +1,19 @@
 module maxwell
-      !! Все что относится к распределению Максвелла
+      !! Р’СЃРµ С‡С‚Рѕ РѕС‚РЅРѕСЃРёС‚СЃСЏ Рє СЂР°СЃРїСЂРµРґРµР»РµРЅРёСЋ РњР°РєСЃРІРµР»Р»Р°
       use kind_module      
       use constants, only : zero, pisqrt, pi2sqrt, pqe
       implicit none
-      integer, parameter :: i0 = 5010
+      integer, parameter :: i0 = 1002
 
+      real(wp) v_grid(i0,100)
+      !! СЃРµС‚РєР° РѕР±С‹С‡РЅС‹С… СЃРєРѕСЂРѕСЃС‚РµР№
+
+      real(wp) vij(i0,100), fij0(i0,100,2), fij(i0,100,2)
+      real(wp) dfij(i0,100,2), dij(i0,100,2)
 
       logical flag_d0
-      !! бывший d0
-      integer jindex, kindex
+      !! Р±С‹РІС€РёР№ d0
+      integer jindex,kindex
       !!common/dddql/ d0,jindex,kindex
       
 contains
@@ -32,7 +37,7 @@ contains
       end
       
       function create_vt_grid(vclt) result(vt_grid)
-            !! создание сетки тепловых скоростей
+            !! СЃРѕР·РґР°РЅРёРµ СЃРµС‚РєРё С‚РµРїР»РѕРІС‹С… СЃРєРѕСЂРѕСЃС‚РµР№
             implicit none
             real(wp), intent(in) :: vclt
             real(wp) :: vt_grid(i0)            
@@ -92,9 +97,9 @@ contains
       end subroutine      
 
       real(wp) function funmaxwell(v,dfunmaxwell)
-            !! распределение Максвелла 
+            !! СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ РњР°РєСЃРІРµР»Р»Р° 
             !! $$ f(v) = \frac{1}{\sqrt{2\pi}} \exp(-\frac{1}{2} v^2 ))$$
-            !! и его производная
+            !! Рё РµРіРѕ РїСЂРѕРёР·РІРѕРґРЅР°СЏ
             !! $$ dfmaxw = - v \cdot f(v) $$
             implicit none
             real(wp) v, dfunmaxwell, arg
@@ -105,9 +110,9 @@ contains
       end      
 
       real(wp) function fmaxw_classic(v,alfa2,dfmaxw)
-            !! распределение Максвелла с альфа-частицами
+            !! СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ РњР°РєСЃРІРµР»Р»Р° СЃ Р°Р»СЊС„Р°-С‡Р°СЃС‚РёС†Р°РјРё
             !! $$ f(v) = \frac{1}{\sqrt{2\pi}} \exp(-\frac{1}{2} v^2 (1.0 + \frac{1}{2} \cdot alfa_2 \cdot v^2))$$
-            !! и его производная
+            !! Рё РµРіРѕ РїСЂРѕРёР·РІРѕРґРЅР°СЏ
             !! $$ dfmaxw = - v \cdot (1.0 + alfa_2 \cdot v^2) \cdot f(v) $$
             implicit none
             real(wp) v,alfa2,dfmaxw

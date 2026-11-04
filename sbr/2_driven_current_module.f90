@@ -3,12 +3,12 @@ module driven_current_module
     use kind_module
     implicit none
 
-    !real(wp)  :: zv1(100,2), zv2(100,2)
+    real(wp)  :: zv1(100,2), zv2(100,2)
     !common/plosh/ zv1(100,2),zv2(100,2)!,sk(100)
     
     type DrivenCurrent
     real(wp) :: cu 
-    !! ??  может лучше cuj
+    !! ??  РјРѕР¶РµС‚ Р»СѓС‡С€Рµ cuj
 
     real(wp) :: cu0    
     !! ??              cujoh
@@ -60,7 +60,7 @@ module driven_current_module
 contains
 
     function DrivenCurrent_constructor(size) result(this)
-        !- конструктор для DrivenCurrent
+        !- РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ DrivenCurrent
         use rt_parameters, only : nr
         implicit none
         type(DrivenCurrent) :: this
@@ -79,7 +79,7 @@ contains
     end function DrivenCurrent_constructor
 
     subroutine DrivenCurrent_evaluate(this, ROC)
-        !- заключительное вычисление DrivenCurrent
+        !- Р·Р°РєР»СЋС‡РёС‚РµР»СЊРЅРѕРµ РІС‹С‡РёСЃР»РµРЅРёРµ DrivenCurrent
         use constants, only: zero
         implicit none
         class(DrivenCurrent), intent(inout) :: this
@@ -108,7 +108,7 @@ contains
 
 
     function DrivenCurrentResult_constructor(positive_dc, negative_dc) result(this)
-        !- конструктор для DrivenCurrentResult
+        !- РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ DrivenCurrentResult
         implicit none
         type(DrivenCurrent), intent(in) :: positive_dc
         type(DrivenCurrent), intent(in) :: negative_dc

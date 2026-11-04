@@ -39,7 +39,7 @@ module iteration_result_mod
         !eta_eff=1.d17*avedens*r0*oi/plaun
         !write (*,*) 'eta_eff=<Ne>*R*I/P, A/(W*m^2)=',eta_eff !sav2010
         real(wp) :: residual 
-        !! невязка 'nevyazka=', pchg        
+        !! РЅРµРІСЏР·РєР° 'nevyazka=', pchg        
     
     contains
         procedure :: print => iteration_result_print

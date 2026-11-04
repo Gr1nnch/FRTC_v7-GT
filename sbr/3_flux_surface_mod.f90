@@ -1,24 +1,24 @@
 module FluxSurface_mod
-    !! все что связанно с магнитными поверхностями
+    !! РІСЃРµ С‡С‚Рѕ СЃРІСЏР·Р°РЅРЅРѕ СЃ РјР°РіРЅРёС‚РЅС‹РјРё РїРѕРІРµСЂС…РЅРѕСЃС‚СЏРјРё
     use kind_module
     type FluxSurface 
-    !! класс магнитной поверхности
+    !! РєР»Р°СЃСЃ РјР°РіРЅРёС‚РЅРѕР№ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё
         integer       :: index
-        !! номер магнитной поверхности
+        !! РЅРѕРјРµСЂ РјР°РіРЅРёС‚РЅРѕР№ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё
         real(wp) :: r
-        !! радиус
+        !! СЂР°РґРёСѓСЃ
         real(wp) :: vmax
         !! vmax=cltn/vto
         real(wp) :: vt
-        !! наверно тепловая скорость электронов????? vt=fvt(r)
+        !! РЅР°РІРµСЂРЅРѕ С‚РµРїР»РѕРІР°СЏ СЃРєРѕСЂРѕСЃС‚СЊ СЌР»РµРєС‚СЂРѕРЅРѕРІ????? vt=fvt(r)
         integer       :: ipt
-        !! размер vgrid
+        !! СЂР°Р·РјРµСЂ vgrid
         real(wp), allocatable :: vgrid(:)
         !! 
         real(wp), allocatable :: vr_grid(:)
-        !! бываший vrj
+        !! Р±С‹РІР°С€РёР№ vrj
         real(wp), allocatable :: diffusion(:)
-        !! бывший dijk(i,j,k) или dj(i)
+        !! Р±С‹РІС€РёР№ dijk(i,j,k) РёР»Рё dj(i)
         !   complex         :: inst_field1
         contains
         !procedure :: set   => set_e

@@ -15,7 +15,6 @@
       use plasma
       use rt_parameters
       use maxwell  
-      use nr_grid, only: dij
       use spectrum_mod    
       use lhcd_module  
       implicit none
@@ -59,8 +58,8 @@
       call init_plasma(NA1,ABC,BTOR,RTOR,UPDWN,GP2,
      & AMETR,RHO,SHIF,ELON,TRIA,MU,NE,TE,TI,ZEF,UPL)
 
-      !call write_plasma(time)
-      call write_equilibrium(time)
+      call write_plasma(time)
+      
       call write_lcms
 
       full_spectrum = read_spectrum('lhcd/spectrum.dat')
@@ -148,13 +147,13 @@
              
              if(pe.ne.zero) then
                   vi_pe=vint(out_power, roc) ! define in stdfun.f
-                  ! VINT:	Volume integral {0,R} of any array
+                  ! VINT:     Volume integral {0,R} of any array
                   ! Only a radially dependent array may be the 1st parameter of the function
                   ! Examples:
-                  !    out\Vint(CAR3)	!Radial profile of CAR3 volume integral
+                  !    out\Vint(CAR3)     !Radial profile of CAR3 volume integral
                   !    out_Vint(CAR3,Ro); !Volume integral {0,Ro} of CAR3
                   !    out_Vint(CAR3B)    !Total volume integral of CAR3 (0,ROC)
-                  !			(Yushmanov 26-DEC-90)
+                  !                 (Yushmanov 26-DEC-90)
                   if(vi_pe.ne.zero) then
                         do i=1,ngrid
                               out_power(i)= pe*out_power(i)/vi_pe

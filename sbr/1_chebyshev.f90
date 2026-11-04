@@ -10,9 +10,9 @@ contains
     !! computes the n coefficients c(k) such that func(x) approximately =
     !! SUMM_(k=1)^(k=n)[c(k)*T(k-1)(y)]-c(1)/2, where y and x are related by
     !! (5.8.10). This routine is to be used with moderately large n 
-    !! (e.g., 30 or 50), the array of cs subsequently to be truncated
+    !! (e.g., 30 or 50), the array of cВ’s subsequently to be truncated
     !! at the smaller value m such that c(m+1) and subsequent elements 
-    !! are negligible. Parameters: Maximum expected value of n, and ð. 
+    !! are negligible. Parameters: Maximum expected value of n, and Г°. 
         implicit none
         INTEGER n,NMAX
         real(wp) a,b,c(n),func,PI

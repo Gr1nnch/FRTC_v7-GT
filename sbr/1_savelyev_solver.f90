@@ -6,7 +6,7 @@ module savelyev_solver_module
     PRIVATE :: q, k, d
 contains
     subroutine savelyev_solver(alfa2, nt, h, dt, n, ybeg, yend, d1,d2,d3, y)
-        !! разностная схема Савельева для уравнения Фоккера-Планка
+        !! СЂР°Р·РЅРѕСЃС‚РЅР°СЏ СЃС…РµРјР° РЎР°РІРµР»СЊРµРІР° РґР»СЏ СѓСЂР°РІРЅРµРЅРёСЏ Р¤РѕРєРєРµСЂР°-РџР»Р°РЅРєР°
         implicit none
         real(wp), intent(in)  :: alfa2      
         integer, intent(in)   :: nt, n
@@ -170,10 +170,8 @@ contains
 
 
     real(wp) function d(x)
-        !! возможно одна из самых замедляющих функций
-        use maxwell, only: i0, flag_d0, jindex, kindex
-        use nr_grid, only: vij, dij
-        use constants, only : zero
+        !! РІРѕР·РјРѕР¶РЅРѕ РѕРґРЅР° РёР· СЃР°РјС‹С… Р·Р°РјРµРґР»СЏСЋС‰РёС… С„СѓРЅРєС†РёР№
+        use maxwell
         use lock_module
         implicit none
         !integer i0

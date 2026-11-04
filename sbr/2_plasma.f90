@@ -1,19 +1,18 @@
 module plasma
-    !! модуль параметров плазмы
+    !! РјРѕРґСѓР»СЊ РїР°СЂР°РјРµС‚СЂРѕРІ РїР»Р°Р·РјС‹
     use kind_module  
-    use nr_grid, only: MAX_NR
     implicit none
     integer ngrid, nspl
     !! ASTRA radial grid number
     real(wp) tcur
-    !! время (придумать название для переменной получше)
+    !! РІСЂРµРјСЏ (РїСЂРёРґСѓРјР°С‚СЊ РЅР°Р·РІР°РЅРёРµ РґР»СЏ РїРµСЂРµРјРµРЅРЅРѕР№ РїРѕР»СѓС‡С€Рµ)
     real(wp) rm
     !! minor radius in mid-plane, cm
     real(wp) b_tor0
-    !! тороидальное магнитное поле
-    !! временно нужно две переменных, тоже нужно исправить
+    !! С‚РѕСЂРѕРёРґР°Р»СЊРЅРѕРµ РјР°РіРЅРёС‚РЅРѕРµ РїРѕР»Рµ
+    !! РІСЂРµРјРµРЅРЅРѕ РЅСѓР¶РЅРѕ РґРІРµ РїРµСЂРµРјРµРЅРЅС‹С…, С‚РѕР¶Рµ РЅСѓР¶РЅРѕ РёСЃРїСЂР°РІРёС‚СЊ
     real(wp) b_tor
-    !! тороидальное магнитное поле
+    !! С‚РѕСЂРѕРёРґР°Р»СЊРЅРѕРµ РјР°РіРЅРёС‚РЅРѕРµ РїРѕР»Рµ
 
     real(wp) r0
     real(wp) z0
@@ -21,25 +20,25 @@ module plasma
     real(wp), dimension(:),allocatable:: con,tem,temi,zeff,afld
     real(wp), dimension(:),allocatable:: rh,rha,drhodr,delta,ell,gamm,amy
 
-    real(wp) tet1, tet2, gap_tet_plus, gap_tet_minus
-    !! GRILL parameters 
+    real(wp) tet1, tet2
+    !!common /a0a2/ 
 
     real(wp) xmi,cnye,cnyi,xsz,vt0 
     !!/a0ef3/ xmi,cnye,cnyi,xsz,vt0 
     real(wp) cnstvc
 
     real(wp) ww
-    !! частота падающей волны 
+    !! С‡Р°СЃС‚РѕС‚Р° РїР°РґР°СЋС‰РµР№ РІРѕР»РЅС‹ 
 
     real(wp) cltn
     !!common /a0ef1/ cltn    
 
-    real(wp) vperp(50,MAX_NR),cnstal,zza,zze,valfa!,kv
+    real(wp) vperp(50,100),cnstal,zza,zze,valfa!,kv
     !common /a0i5/ vperp(50,100),cnstal,zza,zze,valfa!,kv
 
     real(wp) vpmax
 
-    real(wp) vk(MAX_NR), sk(MAX_NR)
+    real(wp) vk(100), sk(100)
     !common /a0i2/ vk(100)
 
     integer, parameter :: ipsy = 5, ncoef = 5
@@ -57,8 +56,8 @@ module plasma
     real(wp) chebne(50),chebdne(50),chebddne(50)    
     !!common/ne_cheb
 
-    real(wp) enorm(MAX_NR), fst(MAX_NR)
-    !! em поле и еще что-то
+    real(wp) enorm(100), fst(100)
+    !! em РїРѕР»Рµ Рё РµС‰Рµ С‡С‚Рѕ-С‚Рѕ
     real(wp) dn1, dn2, dn3
 contains
     subroutine init_plasma(NA1, ABC, BTOR, RTOR, UPDWN, GP2, AMETR, RHO, SHIF, ELON, TRIA,MU, NE, TE, TI, ZEF, UPL)
@@ -68,11 +67,11 @@ contains
         use spline_module
         use chebyshev
         use math_module
-        use xpoint
         implicit none
         integer, intent(in)  :: NA1
         real(wp), intent(in) :: ABC, BTOR, RTOR, UPDWN, GP2
         real(wp), dimension(*) :: AMETR, RHO, SHIF, ELON, TRIA,MU,  NE, TE, TI, ZEF, UPL
+        real (wp), dimension(NA1) :: sshift !!!manual Shafran shift
         integer i, k
         integer, parameter :: N  = 501
         real(wp) :: znak_tor, znak_pol, fpol, dfmy
@@ -84,13 +83,15 @@ contains
             allocate(temi(N),zeff(N), afld(N), source=0.0_wp)
             allocate(delta(N),ell(N),gamm(N),amy(N), source=0.0_wp)
         end if
-        !open(62,file='lhcd/Equil_globgel.dat')
+
+       ! open(20,file='sshift05.dat')   !!!FT2
+        open(20,file='sshift_gelik.dat')  !!!Globus-M2
         do i=1, ngrid
-            !read(62,*) zatch,ellipc(i),treug(i),sshift(i)
+            read(20,*) sshift(i)  !!!!!!!!!!
             rh(i)=AMETR(i)/ABC
             rha(i)=RHO(i)/ABC  !/ABC instead of /ROC is not a mistake!
-            delta(i)=(SHIF(1)-SHIF(i))/ABC  !FRTC Shafr. shift. defin.
-            !delta(i)=(sshift(1)-sshift(i))/ABC  !FRTC Shafr. shift. defin.
+            delta(i)=(sshift(1)-sshift(i))/ABC  !FRTC Shafr. shift. defin.  !!!!!!!
+            !delta(i)=(SHIF(1)-SHIF(i))/ABC  !FRTC Shafr. shift. defin.
             ell(i)=ELON(i)
             gamm(i)=rh(i)*TRIA(i)
             con(i)=NE(i)
@@ -103,7 +104,7 @@ contains
                 afld(i)=UPL(i)/RTOR/GP2 
             endif
         end do
-        !close(62)
+        close(20) !!!!!!!!!!!!!!!!!!!!!!!!!!!
         rh(ngrid)=1.d0
         rh1=rh(1)          !saving the first ASTRA radial grid element
         rh(1) = 0.0d0         !shifting the first element to zero
@@ -159,7 +160,7 @@ contains
          cmy(k)=coeffs(k-1)
         end do
   
-        ! зачем-то меняет знак коэффициентов????
+        ! Р·Р°С‡РµРј-С‚Рѕ РјРµРЅСЏРµС‚ Р·РЅР°Рє РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ????
         znak_tor=dsign(1.d0,dble(itor))
         b_tor=znak_tor*dabs(b_tor0)
         fpol=fdf(1.d0,cmy,ncoef,dfmy)
@@ -168,20 +169,6 @@ contains
          cmy(i)=znak_pol*cmy(i)
         end do
 
-        open(77,file='lhcd/xpout.dat')
-            write(77,*) rm
-            write(77,*) r0
-            write(77,*) z0
-            do i=1,ipsy
-                write(77,*) cdl(i)
-            end do
-            do i=1,ipsy
-                write(77,*) cly(i)
-            end do
-            do i=1,ipsy
-                write(77,*) cgm(i)
-            end do
-        close(77)
         
     !!!!!!!!!!!!!!! spline approximation of plasma profiles !!!!!!!!!!!!!!!!
         call splne(rh,con,nspl,y2dn)
@@ -198,22 +185,8 @@ contains
         
         call init_parameters
         call find_volums_and_surfaces
-        call readxpnt
 
     end subroutine
-
-    function calc_theta(z, xly) result(tet)
-        use constants
-        implicit none
-        real(wp) :: z, xly
-        real(wp) :: arg, tet
-        arg=(z-z0)/(xly*rm)
-        if(dabs(arg).lt.1.d0) then
-            tet=dasin(arg)      ! upper grill corner poloidal coordinate
-        else
-            tet=0.5d0*pi         ! upper grill corner poloidal coordinate
-        end if
-    end function
 
     subroutine init_parameters
         use constants
@@ -224,10 +197,18 @@ contains
         real(wp) :: hr, sss
     !!!   
         xly = fdf(one,cly,ncoef,xlyp)
-        tet1 = calc_theta(zplus, xly)!+pi/2
-        tet2 = calc_theta(zminus, xly)!+pi/2
-        gap_tet_plus = calc_theta(ZGapPlus, xly)
-        gap_tet_minus = calc_theta(ZGapMinus, xly)
+        arg1=(zplus-z0)/(xly*rm)
+        arg2=(zminus-z0)/(xly*rm)
+        if(dabs(arg1).lt.1.d0) then
+            tet1=dasin(arg1)      ! upper grill corner poloidal coordinate
+        else
+            tet1=0.5d0*pi         ! upper grill corner poloidal coordinate
+        end if
+        if(dabs(arg2).lt.1.d0) then
+            tet2=dasin(arg2)      ! lower grill corner poloidal coordinate
+        else
+            tet2=-0.5d0*pi        ! lower grill corner poloidal coordinate
+        end if   
         
         !------------------------------------------------------------
         ! calculate constants
@@ -248,7 +229,7 @@ contains
         xsz=clt/ww/rm
         !ccur=pqe*vt0*0.333d-9
         !!      ccurnr=pqe*pqe*0.333d-9/pme
-        rrange=rrange*hr !ToDo если вызывается несколько раз то будут проблемы
+        rrange=rrange*hr !ToDo РµСЃР»Рё РІС‹Р·С‹РІР°РµС‚СЃСЏ РЅРµСЃРєРѕР»СЊРєРѕ СЂР°Р· С‚Рѕ Р±СѓРґСѓС‚ РїСЂРѕР±Р»РµРјС‹
         
         valfa=1.d9*dsqrt(1.91582d0*talfa/xmalfa)
         !  valfa (cgs units) = birth velocity
@@ -289,27 +270,6 @@ contains
 
     end subroutine
 
-     subroutine write_equilibrium(time_stamp)
-        real(wp), intent(in) :: time_stamp
-        character(120) file_name
-        integer :: unit_num, iostat
-        integer i
-        ! NAMELIST definition
-        namelist /geometry/  rm, r0, z0
-        namelist /fields/  b_tor0
-        namelist /profile_approx/  cdl,cly,cgm,cmy
-        namelist /radial_data/  rh, rha, delta, ell, gamm, con, tem, temi, zeff, afld
-        
-        write(file_name,'("lhcd/plasma/", f9.7,".nml")')  time_stamp
-        print *, file_name
-        open(newunit= unit_num, file= file_name, status= 'new')
-        write(unit_num, nml=geometry, iostat=iostat)
-        write(unit_num, nml=fields, iostat=iostat)
-        write(unit_num, nml=profile_approx, iostat=iostat)
-        write(unit_num, nml=radial_data, iostat=iostat)
-        close(unit_num)
-    end subroutine
-
     subroutine write_lcms
         !! write lcms
         use constants
@@ -340,124 +300,6 @@ contains
         close(iu)
     end subroutine
 
-
-
-    subroutine calculate_dfundv(ispectr)
-        !! calculate dfundv что такое dfundv?
-        use constants, only: zero
-        use rt_parameters, only: nr
-        !use plasma, only: fvt, vt0, cltn
-        use small_vgrid, only: vrj, dfundv, vz1, vz2, vgrid, ipt
-        use maxwell, only: i0
-        use nr_grid, only: vij, dfij, dij
-        use lock_module, only: lock, linf
-        implicit none
-        integer, intent(in) :: ispectr
-        real(wp), dimension(:), allocatable:: vvj, vdfj
-        integer  :: i, j, k 
-        integer  :: klo,khi,ierr
-        real(wp) :: dfout
-        real(wp) :: r, hr
-        real(wp) :: vt, vto
-        hr = 1.d0/dble(nr+1)
-        allocate(vvj(i0),vdfj(i0))
-        k=(3-ispectr)/2
-        do j=1,nr
-            r=hr*dble(j)
-            vt=fvt(r)
-            vto=vt/vt0
-            do i=1,i0
-                vvj(i)=vij(i,j)
-                vdfj(i)=dfij(i,j,k) !=dfundv(i,j)*vto**2
-            end do
-            do i=1,ipt
-                vrj(i)=vgrid(i,j)/vto   !Vpar/Vt
-                call lock(vvj,i0,vrj(i),klo,khi,ierr)
-                if(ierr.eq.1) then
-                    write(*,*)'lock error in read distribution function'
-                    write(*,*)'j=',j,'i0=',i0
-                    write(*,*)'vvj(1)=',vvj(1),' vvj(i0)=',vvj(i0)
-                    write(*,*)'i=',i,' vrj(i)=',vrj(i),' vmax=',cltn/vto
-                    write(*,*)
-                    pause'next key = stop'
-                    stop
-                end if
-                call linf(vvj,vdfj,vrj(i),dfout,klo,khi)
-                dfundv(i,j)=dfout/vto**2
-                if(dfundv(i,j).gt.zero) dfundv(i,j)=zero
-            end do
-        end do
-        deallocate(vvj,vdfj)
-    end
-
-        
-    subroutine recalculate_f_for_a_new_mesh(ispectr, iterat)
-        !!   recalculate f' for a new mesh
-        use constants, only : zero
-        use rt_parameters, only : nr, ni1, ni2, cdel
-        !use plasma, only: vt0, fvt, cltn
-        use small_vgrid, only: vrj, dfundv, vz1, vz2, vgrid, gridvel
-        use small_vgrid, only: kpt1, kpt3, ipt, ipt1
-        use nr_grid, only: vzmin, vzmax
-        use maxwell, only: i0
-        use nr_grid, only: vij, dfij
-        use lock_module        
-        implicit none
-        integer, intent(in) :: ispectr, iterat
-        
-        integer i, j, k
-        real(wp) ::  dfout
-        real(wp), dimension(:), allocatable:: vvj, vdfj
-        integer :: klo,khi,ierr
-        real(wp) :: r, hr, vt, vto, vmax
-        real(wp) :: v1, v2, vp1, vp2
-
-        allocate(vvj(i0),vdfj(i0))
-        hr = 1.d0/dble(nr+1)
-        k=(3-ispectr)/2
-        do j=1,nr
-            r=hr*dble(j)
-            vt=fvt(r)
-            vto=vt/vt0
-            if(iterat.gt.0) then
-                v1=dmin1(vzmin(j),vz1(j))
-                v2=dmax1(vzmax(j),vz2(j))
-            else
-                v1=vzmin(j)
-                v2=vzmax(j)
-            end if
-            vmax=cltn/vto
-            vp1=v1/vto
-            vp2=v2/vto
-            call gridvel(vp1,vp2,vmax,cdel,ni1,ni2,ipt1,kpt3,vrj)
-            do i=1,i0
-                vvj(i)=vij(i,j)
-                vdfj(i)=dfij(i,j,k) !=dfundv(i,j)*vto**2
-            end do
-            do i=1,ipt
-                call lock(vvj,i0,vrj(i),klo,khi,ierr)
-                if(ierr.eq.1) then
-            !!!         if(vrj(i).gt.vvj(i0)) exit
-                    write(*,*)'lock error in new v-mesh'
-                    write(*,*)'j=',j,' i0=',i0
-                    write(*,*)'vvj(1)=',vvj(1),' vvj(i0)=',vvj(i0)
-                    write(*,*)'i=',i,' vrj(i)=',vrj(i)
-                    write(*,*)
-                    pause'next key = stop'
-                    stop
-                end if
-                call linf(vvj,vdfj,vrj(i),dfout,klo,khi)
-                vgrid(i,j)=vrj(i)*vto
-                dfundv(i,j)=dfout/vto**2
-                if(dfundv(i,j).gt.zero) dfundv(i,j)=zero
-            end do
-            vz1(j)=v1
-            vz2(j)=v2
-        end do
-        deallocate(vvj,vdfj)
-    end subroutine    
-
-
     subroutine find_volums_and_surfaces
         use constants
         use rt_parameters, only: nr
@@ -479,108 +321,6 @@ contains
         end do        
     end subroutine
 
-    
-    subroutine find_velocity_limits_and_initial_dfdv(anb)
-        use constants, only: c0, c1, zero, zalfa, xmalfa, xlog, one_third
-        use rt_parameters, only: nr, inew, ni1, ni2, itend0, kv, factor
-        !use plasma !, only: fn1, fn2, fvt, vt0
-        use small_vgrid, only: vrj, dfundv, vz1, vz2, vgrid
-        use small_vgrid, only: kpt1, kpt3, ipt, ipt1, ipt2, nvpt
-        use small_vgrid, only: MAX_PT, gridvel
-        use nr_grid, only: dens, eta, fcoll
-        use nr_grid, only: source !! нужна ли она тут вообще???
-        use nr_grid, only: MAX_NR
-        implicit none
-        real(wp), intent(inout) :: anb
-        integer  :: i, j, k
-        real(wp) :: v, vt, vto, wpq, whe
-        real(wp) :: u, u1, e1, e2, e3, tmp
-        real(wp) :: cn1, cn2
-        real(wp) :: tt, vmax, v1, v2
-        real(wp) :: pn, fnr, fnrr
-        real(wp) :: r, hr
-        real(wp) :: dvperp, ddens, tdens
-        real(wp) :: vpmin(MAX_NR), vcva(MAX_NR)
-        hr = 1.d0/dble(nr+1)
-        !c-------------------------------------------
-        !c find velocity limits and initial dfdv
-        !c--------------------------------------------
-        ipt1=kpt1+1
-        ipt2=ni1+ni2
-        ipt=ipt1+ni1+ni2+kpt3
-        if(ipt.gt.MAX_PT) then
-            write(*,*)'ipt >MAX_PT'
-            pause'stop program'
-            stop
-        end if
-        nvpt=ipt
-
-        do j=1,nr                  ! begin 'rho' cycle
-            r=hr*dble(j)
-            !!!!sav2008       pn=fn(r)
-            !!       pn=fn1(r,fnr)
-            !!       pn=fn2(r,fnr,fnrr) !sav2008
-            if(inew.eq.0) then !vardens
-                pn=fn1(r,fnr)
-            else
-                pn=fn2(r,fnr,fnrr)
-            end if
-            dens(j)=pn
-            vt=fvt(r)
-            vto=vt/vt0
-            wpq=c0**2*pn
-            whe=dabs(b_tor)*c1
-            v=wpq/ww**2
-            u1=whe/ww
-            u=u1**2
-            e1=1d0-v*(1d0/xmi-1d0/u)
-            e2=v/u1
-            e3=v
-            tmp=ft(r)/0.16d-8 !Te, keV
-            cn1=dsqrt(50d0/tmp)  !sav2008
-            if(itend0.gt.0) then
-                eta(j)=1d0-v
-                vcva(j)=cnstvc*vt*dsqrt(2d0)/valfa
-                vpmin(j)=2.0d0*dsqrt(tmp/(-eta(j)))
-222             continue
-                dvperp=(vpmax-vpmin(j))/dble(kv-1)
-                if(dvperp.le.zero) then
-                    vpmax=1.3d0*vpmax
-                    go to 222
-                end if
-                do k=1,kv
-                    vperp(k,j)=vpmin(j)+dble(k-1)*dvperp
-                end do
-                fcoll(j)=.5d-13*dens(j)*zalfa**2*xlog/xmalfa/tmp**1.5d0
-                ddens=dn1*dens(j)
-                tdens=dn2*dens(j)
-                tt=fti(r)**one_third    ! (ti, keV)^1/3
-                source(j)=4d-12*factor*ddens*tdens*dexp(-20d0/tt)/tt**2
-                anb=anb+source(j)*vk(j)
-            end if
-            cn2=dsqrt(dabs(e1))+e2/dsqrt(e3) !sav2008
-            !vz1(j)=cleft*cltn/cn1  !Vpar/Vt0
-            !vz2(j)=cright*cltn/cn2  !Vpar/Vt0
-            !if(vz2(j).gt.0.9d0*cltn) vz2(j)=0.9d0*cltn
-            !v1=vz1(j)/vto !Vpar/Vt(rho)
-            !v2=vz2(j)/vto !Vpar/Vt(rho)
-            vmax=cltn/vto
-            v1=4.d0  !Vpar/Vt(rho)
-            v2=10.d0 !cright*cltn/cn2 !10.d0 !Vpar/Vt(rho)
-            if(v2.ge.vmax) v2=0.5d0*vmax
-            if(v1.ge.v2) v1=v2-2.d0
-            call gridvel(v1,v2,vmax,0.5d0,ni1,ni2,ipt1,kpt3,vrj)
-            vz1(j)=v1*vto !Vpar/Vt0
-            vz2(j)=v2*vto !Vpar/Vt0
-            if(vz2(j).gt.0.9d0*cltn) vz2(j)=0.9d0*cltn
-            do i=1,ipt
-                vgrid(i,j)=vrj(i)*vto
-            end do
-        end do                     ! end 'rho' cycle 
-
-
-    end subroutine
-
     real(wp) function fn(x)
     !! plasma  density,  cm^-3
         use constants, only: zero
@@ -599,7 +339,7 @@ contains
     end    
 
     real(wp) function fvt(r)
-    !! нет описания
+    !! РЅРµС‚ РѕРїРёСЃР°РЅРёСЏ
         real(wp), intent(in) :: r
         real(wp) :: pt
         pt=ft(r)
@@ -748,11 +488,9 @@ contains
         use rt_parameters, only: nr, inew
         use spline_module
         use maxwell        
-        use nr_grid, only: vij, fij, dfij, fij0, dij
         implicit none
-        integer j,i
+        integer j
         real(wp) r, vclt
-        open(74, file='lhcd/out/startMaxwel.dat')
         do j=1,nr
             r=dble(j)/dble(nr+1)
             vclt=3.d10/fvt(r)
@@ -761,11 +499,7 @@ contains
             vij(1:i0,j) = create_vt_grid(vclt)
             call init_fmaxw_classic(vclt,enorm(j),fij(:,j,1),dfij(:,j,1)) ! positive
             call init_fmaxw_ext(vclt,enorm(j),fij(:,j,2),dfij(:,j,2))     ! negative
-            do i=1,i0
-                write(74,*)vij(i,j), fij(i,j,1), fij(i,j,2)
-            end do
           end do
-          close(74)
           fij0(:,:,:)=fij(:,:,:)
           dij(:,:,:)=zero
 
@@ -774,7 +508,6 @@ contains
     function obeom(ptet,pa) result(res)
         use constants
         use approximation
-        use xpoint
         implicit real*8 (a-h,o-z)
         real(wp), intent(in)    :: ptet
         real(wp), intent(in)    :: pa
@@ -799,11 +532,6 @@ contains
         dxdtdt=-pa*cotet-two*xgm*(cotet**2-sitet**2)
         dzdtdt=-xly*pa*sitet
         x0t=dxdt
-
-
-        if(-5.gt.0) then !!!!!!!!!!!xtochk
-            call xpnt(pa,ptet+1.5d0*pi,dxdr,dxdt,dzdr,dzdt,x0,dxdrdt,dxdtdt,dzdrdt,dzdtdt,x0t)
-        end if
 !--------------------------------------
 ! components of metric tensor
 !--------------------------------------
@@ -819,7 +547,6 @@ contains
     function ploshad(ptet,pa) result(res)
         use constants
         use approximation
-        use xpoint
         implicit real*8 (a-h,o-z)
         real(wp), intent(in)    :: ptet
         real(wp), intent(in)    :: pa
@@ -844,11 +571,6 @@ contains
         dxdtdt=-pa*cotet-two*xgm*(cotet**2-sitet**2)
         dzdtdt=-xly*pa*sitet
         x0t=dxdt
-
-        if(-5.gt.0) then !!!!!!!!!!!xtochk
-            call xpnt(pa,ptet+1.5d0*pi,dxdr,dxdt,dzdr,dzdt,x0,dxdrdt,dxdtdt,dzdrdt,dzdtdt,x0t)
-        end if
-
         !--------------------------------------
         ! components of metric tensor
         !--------------------------------------

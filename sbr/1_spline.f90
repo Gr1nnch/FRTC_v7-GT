@@ -1,5 +1,5 @@
 module spline_module
-    !! сплайны
+    !! СЃРїР»Р°Р№РЅС‹
     use kind_module
     implicit none
     

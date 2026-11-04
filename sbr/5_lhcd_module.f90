@@ -1,5 +1,5 @@
 module lhcd_module
-    !! LHCD модуль
+    !! LHCD РјРѕРґСѓР»СЊ
     use kind_module
     use spectrum_mod
     implicit none
@@ -13,35 +13,24 @@ contains
         use plasma, only: nspl, cltn, rh, r0, con, tcur
         use plasma, only: find_volums_and_surfaces
         use rt_parameters, only: pabs0, ipri, niterat
-        use rt_parameters, only: nr, kv, ntet, pgiter, itend0
-        use rt_parameters, only: iw, iw_start
-        use trajectory_module, only: write_trajectories,  init_trajectories
+        use rt_parameters, only: nr, kv, ntet, iw, pgiter, itend0
+        use trajectory_module, only: view,  init_trajectory
         use spectrum_mod
         use manager_mod
-        use nr_grid, only: ppv1, ppv2
-        use nr_grid, only: pdprev1, pdprev2        
-        use nr_grid, only: init_nr_grid_arrays, find_nevyazka
-        use nr_grid, only: calculate_total_current_and_power
-        use nr_grid, only: renormalisation_power
-        use small_vgrid,  only: find_achieved_radial_points
-        use small_vgrid,  only: init_small_vgrid_arrays
-        use small_vgrid, only: nvpt
-
+        use current
         use iteration_result_mod
-        use power, only: pnab, plost, psum4
-
-        use plasma, only: calculate_dfundv
-        use plasma, only: find_velocity_limits_and_initial_dfdv, recalculate_f_for_a_new_mesh
-        use math_module,  only: integral
-        use decrements,   only: kzero
+        use iterator_mod, only: pnab, plost, psum4
+        use iterator_mod, only: nvpt
+        use iterator_mod, only: calculate_dfundv
+        use iterator_mod, only: find_velocity_limits_and_initial_dfdv, recalculate_f_for_a_new_mesh
+        use math_module, only: integral
+        use decrements, only: kzero
         use source_new_mod
         
         implicit none
-        real*8 outpe, pe_out 
+        type(Spectrum) spectr
+        real*8 outpe,pe_out 
         dimension outpe(*)
-
-        type(Spectrum)        :: spectr
-        type(IterationResult) :: iteration_result
 
         integer  :: iterat
         real(wp) :: cn1, avedens
@@ -53,33 +42,41 @@ contains
         real(wp) :: oi
         real(wp) :: ol, oc, oa, of
         real(wp) :: zff, cnyfoc, dconst, fout
-        
-        real(wp) :: plaun
 
-        integer  :: ispectr
-        integer  :: iww, iw0, izz
+        real(wp) :: pdprev1(100), pdprev2(100)
+        real(wp) :: source(100)
+    
+        type(IterationResult) :: iteration_result
+
+        real(wp)    :: plaun
+
+        integer ispectr
+        integer :: iww, iw0, izz
 
         plaun = spectr%input_power
+
         ispectr = spectr%direction
-        iw = iw_start
+        !lfree=1
+
         iw0=iw
     
         call find_volums_and_surfaces
 
-        call init_nr_grid_arrays(cltn)
-        call init_small_vgrid_arrays        
-        call init_iteration_vars
-  
+        ppv1=zero
+        ppv2=zero
+        pnab=zero
+        plost=zero
+        psum4=zero
         anb=zero
         fuspow=zero
         o_da=zero
         
-        call find_velocity_limits_and_initial_dfdv(anb)
+        call find_velocity_limits_and_initial_dfdv(anb, source)
         call calculate_dfundv(ispectr)
 
         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         if(itend0.gt.0) then  ! begin alpha-source renormalisation
-            call alpha_source_renormalisation(anb, fuspow)
+            call alpha_source_renormalisation(anb, fuspow, source)
         end if
 
         ! ------------------------------------
@@ -87,9 +84,25 @@ contains
         ! ------------------------------------
         iww=0
         izz=zero
+        ! 
+        pdl=zero
+        pdc=zero
+        pda=zero
+        pdfast=zero
+
+        !! РјР°СЃСЃРёРІС‹ РґР»СЏ РЅРµРІР·СЏР·РєРё
+        pdprev1=zero
+        pdprev2=zero
+
+        dql=zero
+        dq1=zero
+        dq2=zero
+        dncount=zero
+        vzmin=cltn
+        vzmax=-cltn
         kzero=kv
 
-        call init_trajectories(iw0, spectr)
+        call init_trajectory
         call init_alphas
         
         ! ----------------------------------------------------------------------
@@ -105,9 +118,6 @@ contains
         !!!!!!!!!!!!!!! begin iterations !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         q_rest=plaun
         iterat=0
-        !! массивы для невзязки
-        pdprev1=zero
-        pdprev2=zero
 
     80  continue
         call manager(iterat, iw0, ntet, spectr)
@@ -116,7 +126,7 @@ contains
 
         call renormalisation_power
         
-        pchg = find_nevyazka()
+        pchg = find_nevyazka(pdprev1, pdprev2)
 
         call calculate_total_current_and_power(ol, oc, oa, of)
 
@@ -152,9 +162,7 @@ contains
 
         if(iterat.le.niterat) then
             call recalculate_f_for_a_new_mesh(ispectr, iterat)
-            call init_iteration_vars
-            call init_nr_grid_arrays(cltn)
-            call init_small_vgrid_arrays
+            call init_iteration
             goto 80
         end if
         ! ------------------------------------------
@@ -173,7 +181,7 @@ contains
 
         call calculate_diffusion(ispectr)
 
-        call write_trajectories(tcur,ispectr,spectr%size,ntet)  !writing trajectories into a file
+        call view(tcur,ispectr,spectr%size,ntet)  !writing trajectories into a file
 
         call write_lhcd_power(tcur, ispectr) 
 
@@ -183,20 +191,20 @@ contains
         
     end    
     
-    subroutine alpha_source_renormalisation(anb, fuspow)
+    subroutine alpha_source_renormalisation(anb, fuspow, source)
         use constants, only: zero, talfa, one_third
         use rt_parameters, only: nr, dra, factor
         use source_new_mod, only: rsou, sou, npta
         use plasma, only: fti, dn1, dn2, vk
-        use nr_grid, only: dens, source
-        use nr_grid, only: MAX_NR
+        use current, only: dens
         implicit none
         real(wp), intent(inout) :: anb
         real(wp), intent(inout) :: fuspow
+        real(wp), intent(inout) :: source(:)
         real(wp) :: r, hr, tt
         real(wp) :: anb0, aratio, sssour
         real(wp) :: ddens, tdens
-        real(wp) :: sour(MAX_NR)
+        real(wp) :: sour(100)
         integer j
         hr = 1.d0/dble(nr+1)
         fuspow=anb*talfa*1.6022d-19
@@ -235,12 +243,11 @@ contains
         use rt_parameters, only: nr, inew, ni1, ni2
         use plasma, only: zefff, fn1, fn2
         use plasma, only: vt0, fvt, cltn, cnye
-        !use driven_current_module, only : zv1, zv2
-        use small_vgrid, only : dql
-        use maxwell, only: i0
-        use nr_grid, only: vij, dfij, dij
-        use small_vgrid, only: ipt, ipt1, MAX_PT
-        use small_vgrid, only: vrj, dj, vgrid
+        use driven_current_module, only : zv1, zv2
+        use current, only : dql
+        use maxwell, only: i0, vij, dfij, dij
+        use iterator_mod, only: ipt, ipt1
+        use iterator_mod, only: vrj, dj, vgrid
         use lock_module, only: lock
         implicit none
         integer, intent(in) :: ispectr
@@ -250,8 +257,8 @@ contains
         real(wp) :: vt, vto, vmax, zff, cnyfoc
         real(wp) :: pn, fnr, fnrr
         real(wp) :: dconst, ddout
-        !real(wp) :: dijk(MAX_PT,100,2), vrjnew(MAX_PT,100,2)
-        !встречает только один раз common/t01/dijk(101,100,2), vrjnew(101,100,2)
+        real(wp) :: dijk(101,100,2), vrjnew(101,100,2)
+        !РІСЃС‚СЂРµС‡Р°РµС‚ С‚РѕР»СЊРєРѕ РѕРґРёРЅ СЂР°Р· common/t01/dijk(101,100,2), vrjnew(101,100,2)
         !
         hr = 1.d0/dble(nr+1)
         k=(3-ispectr)/2
@@ -274,8 +281,8 @@ contains
             do i=1,ipt
                 vrj(i)=vgrid(i,j)/vto      !Vpar/Vt
                 dj(i)=dql(i,j)*dconst*vto  !D_normir
-                !vrjnew(i,j,k)=vrj(i)
-                !dijk(i,j,k)=dj(i)
+                vrjnew(i,j,k)=vrj(i)
+                dijk(i,j,k)=dj(i)
             end do
             do i=1,i0
                 if(vij(i,j).ge.vmax) then
@@ -297,15 +304,15 @@ contains
                 end if
                 dij(i,j,k)=ddout
             end do
-            !zv1(j,k)=vrj(ipt1)
-            !zv2(j,k)=vrj(ni1+ni2+ipt1)
+            zv1(j,k)=vrj(ipt1)
+            zv2(j,k)=vrj(ni1+ni2+ipt1)
         end do
     end 
 
     subroutine write_lhcd_power(time_stamp, ispectr) 
         use rt_parameters, only: nr
         use plasma, only: sk, vk
-        use nr_grid, only: pdl, pdc        
+        use current, only: pdl, pdc        
         implicit none
         real(wp), intent(in) :: time_stamp
         integer,  intent(in) :: ispectr
@@ -342,19 +349,19 @@ contains
         use constants, only: zero, one
         use rt_parameters, only: nr, ismthout
         use plasma, only: rh, rh1, nspl, vk
-        use nr_grid, only: pdl, pdc
+        use current, only: pdl, pdc
         use math_module, only: fsmoth4
         use lock_module, only: lock2, linf
         implicit none
         real(wp), intent(inout) :: out_pe(*)
+        real(wp) :: rxx(102)
         integer  :: i, j, nrr
         integer  :: klo,khi,ierr
         real(wp) :: hr, fout
-        real(wp), allocatable :: rxx(:), pwe(:), wrk(:)
+        real(wp) :: pwe(102),wrk(102)
 
         hr = 1.d0/dble(nr+1)
         nrr=nr+2
-        allocate(rxx(nr+2), pwe(nr+2), wrk(nr+2))
         rxx(1)=zero
         rxx(nrr)=one
         do j=1,nr
@@ -389,28 +396,46 @@ contains
         end do
         rh(1)=zero
         !
-        deallocate(rxx, pwe, wrk)
     end 
 
-    subroutine init_iteration_vars
+    subroutine init_iteration
         use constants, only : zero
-        use power, only:  psum4, pnab, plost
+        use rt_parameters, only : itend0
+        use current, only: dqi0, ppv1, ppv2
+        use current, only: dql, dq1, dq2, dncount, vzmin, vzmax
+        use current, only: pdl, pdc, pda, pdfast
+        use iterator_mod, only:  psum4, pnab, plost
+        use plasma, only: cltn
         implicit none
+        ppv1=zero
+        ppv2=zero
         psum4=zero
         pnab=zero
         plost=zero
+        dql=zero
+        dq1=zero
+        dq2=zero
+        dncount=zero
+        vzmin=cltn
+        vzmax=-cltn
+        pdl=zero
+        pdc=zero
+        pda=zero
+        pdfast=zero
+        if(itend0.gt.0) then
+              dqi0=zero
+        end if
     end 
 
     subroutine init_alphas
-        !! непонятная процедура. возможно результаты в dqi0 ???
+        !! РЅРµРїРѕРЅСЏС‚РЅР°СЏ РїСЂРѕС†РµРґСѓСЂР°. РІРѕР·РјРѕР¶РЅРѕ СЂРµР·СѓР»СЊС‚Р°С‚С‹ РІ dqi0 ???
         use constants, only: zero
         use rt_parameters, only: nr, itend0, kv
         use plasma, only:  vperp
-        use nr_grid, only:  MAX_NR
-        use small_vgrid, only: dqi0
+        use current, only: dqi0
         implicit none
         integer :: i, j
-        real(wp) :: galfa(50,MAX_NR)  ! возможно массив должеб быть доступен еще где-то
+        real(wp) :: galfa(50,100)  ! РІРѕР·РјРѕР¶РЅРѕ РјР°СЃСЃРёРІ РґРѕР»Р¶РµР± Р±С‹С‚СЊ РґРѕСЃС‚СѓРїРµРЅ РµС‰Рµ РіРґРµ-С‚Рѕ
         if(itend0.gt.0) then
             do j=1,nr           ! begin 'rho' cycle
                 do i=1,50
@@ -425,10 +450,9 @@ contains
     subroutine alphas(d,u,j,kmax,g)
         use decrements, only: dgdu, kzero
         use constants, only : zero, one
-        use nr_grid, only: MAX_NR
         implicit real*8 (a-h,o-z)
         integer, intent(in) :: j, kmax
-        dimension d(50,MAX_NR),u(50,MAX_NR),g(50,MAX_NR)
+        dimension d(50,100),u(50,100),g(50,100)
         !common /arr/ dgdu(50,100),kzero(100)
         real(wp), parameter :: tiny=1.d-30
         integer :: k, km

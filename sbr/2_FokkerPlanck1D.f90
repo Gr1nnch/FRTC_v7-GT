@@ -1,6 +1,6 @@
 module FokkerPlanck1D_mod ! the module name defines the namespace
-    !! модуль содержит функции для решения одномерного уравнения Фоккер-Планка
-    use kind_module
+    !! РјРѕРґСѓР»СЊ СЃРѕРґРµСЂР¶РёС‚ С„СѓРЅРєС†РёРё РґР»СЏ СЂРµС€РµРЅРёСЏ РѕРґРЅРѕРјРµСЂРЅРѕРіРѕ СѓСЂР°РІРЅРµРЅРёСЏ Р¤РѕРєРєРµСЂ-РџР»Р°РЅРєР°
+    use, intrinsic :: iso_fortran_env, only: sp=>real32, dp=>real64
     use savelyev_solver_module
     use chang_cooper_module
     implicit none
@@ -8,30 +8,29 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
         !! solver of FP eq
         !integer          :: direction = 0
         !- direction
-        real(wp)         :: enorm = 0
-        !! электрическое поле
-        real(wp)         :: v_lim = 0
-        !! верхняя граница скорости электронов
-        real(wp), allocatable         :: v(:)
-        !! сетка скоростей
-        real(wp), allocatable         :: f(:)
-        !! распределение
+        real(dp)         :: enorm = 0
+        !! СЌР»РµРєС‚СЂРёС‡РµСЃРєРѕРµ РїРѕР»Рµ
+        real(dp)         :: v_lim = 0
+        !! РІРµСЂС…РЅСЏСЏ РіСЂР°РЅРёС†Р° СЃРєРѕСЂРѕСЃС‚Рё СЌР»РµРєС‚СЂРѕРЅРѕРІ
+        real(dp), allocatable         :: v(:)
+        !! СЃРµС‚РєР° СЃРєРѕСЂРѕСЃС‚РµР№
+        real(dp), allocatable         :: f(:)
+        !! СЂР°СЃРїСЂРµРґРµР»РµРЅРёРµ
         integer         :: i0 = 0 
         !! size of distribution grid
-        real(wp)        :: alfa2  = 0 
-        !! поле со знаком
+        real(dp)        :: alfa2  = 0 
+        !! РїРѕР»Рµ СЃРѕ Р·РЅР°РєРѕРј
         integer         :: n = 0 
         !! size of local grid        
-        real(wp)        :: h  = 0 
+        real(dp)        :: h  = 0 
         !! step of local grid 
-        real(wp), allocatable ::  d1(:), d2(:), d3(:)
-        !! диффузия
+        real(dp), allocatable ::  d1(:), d2(:), d3(:)
+        !! РґРёС„С„СѓР·РёСЏ
     contains
         procedure :: print => FokkerPlanck1D_print
         procedure :: solve_time_step => FokkerPlanck1D_solve_time_step
         procedure :: init_zero_diffusion => FokkerPlanck1D_init_zero_diffusion
         procedure :: init_diffusion => FokkerPlanck1D_init_diffusion
-        procedure :: eval_f_derivate => FokkerPlanck1D_eval_f_derivate
     end type FokkerPlanck1D   
 
     interface FokkerPlanck1D
@@ -41,13 +40,13 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
     contains
 
     function FokkerPlanck1D_constructor(e, v_lim, v, f) result(this)
-        !! конструктор для FokkerPlanck1D
+        !! РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ FokkerPlanck1D
         implicit none
         type(FokkerPlanck1D) :: this
-        real(wp), value :: e, v_lim, v(:), f(:)
+        real(dp), value :: e, v_lim, v(:), f(:)
         integer  :: n
-        real(wp) :: h
-        real(wp), parameter :: h0 = 0.01d0
+        real(dp) :: h
+        real(dp), parameter :: h0 = 0.1d0
         !this%inst_field1 = cmplx(0.,0.) 
         this%enorm     = abs(e)
         this%v_lim = v_lim
@@ -84,14 +83,14 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
 
 
     subroutine FokkerPlanck1D_init_diffusion(this, dif)
-        !! инициализация диффузии для схемы савельева
+        !! РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґРёС„С„СѓР·РёРё РґР»СЏ СЃС…РµРјС‹ СЃР°РІРµР»СЊРµРІР°
         use lock_module
         implicit none
         class(FokkerPlanck1D), intent(inout) :: this
         integer :: n
-        real(wp), dimension(:), intent(in) ::  dif
-        real(wp), dimension(:), allocatable :: xx
-        real(wp) h
+        real(dp), dimension(:), intent(in) ::  dif
+        real(dp), dimension(:), allocatable :: xx
+        real(dp) h
         integer :: i0
         integer i, klo, khi, ierr, klo1, khi1
         integer klo2, klo3, khi2, khi3, ierr1, ierr2, ierr3
@@ -139,61 +138,23 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
         end do
       end subroutine FokkerPlanck1D_init_diffusion
 
-
-
-    subroutine FokkerPlanck1D_eval_f_derivate(this, df)
-        use lock_module
-        implicit none
-        class(FokkerPlanck1D), intent(inout)   :: this
-        real(wp), dimension(:), intent (inout) :: df
-        integer  :: i
-        real(wp) :: dv
-
-        dv = this%v(2)
-
-        do i=1, this%i0
-
-            if(i.eq.1) then
-             df(i)=(this%f(i+1)-this%f(i))/dv
-            else if(i.eq.this%i0) then
-             df(i)=(this%f(i)-this%f(i-1))/dv
-            else
-             df(i)=0.5d0*(this%f(i+1)-this%f(i-1))/dv
-            end if
-
-            if(df(i).gt.0) then
-                print *, 'df>0'
-                !write(*,*)'df>0: i,j,k=',i,j,k
-                !open(333,file='test/derivs.dat')
-                !write(333,*) 'dfij(i,j,k),i,j,k=',df(i,j,k),i,j,k
-                !df(i)=0
-                pause
-            end if
-
-        end do
-           
-
-    end subroutine
-
-    subroutine FokkerPlanck1D_solve_time_step(this, dt, nt, time,nomer)
+    subroutine FokkerPlanck1D_solve_time_step(this, dt, nt)
         use lock_module
         use rt_parameters, only: fp_solver
         implicit none
         class(FokkerPlanck1D), intent(inout) :: this
         
         integer, intent(in) :: nt
-        integer, intent(in) :: nomer
-        real(wp), intent(in)  :: dt
-        real(wp), intent(in) :: time
+        real(dp), intent(in)  :: dt
 
 
         !real*8, intent (inout), optional :: dfj0(:)
 
-        real(wp), parameter :: zero=0.d0
-        real(wp)  y(this%n+2),x(this%n+2)
-        real(wp), dimension(:), allocatable:: fj, dfj,  givi
+        real(dp), parameter :: zero=0.d0
+        real(dp)  y(this%n+2),x(this%n+2)
+        real(dp), dimension(:), allocatable:: fj, dfj,  givi
         integer i, ii, it, ibeg, klo, khi, ierr, klo1, khi1
-        real(wp) shift, ybeg, yend, tend, dff, fff
+        real(dp) shift, ybeg, yend, tend, dff
 
          !!!!!! grid !!!!!!!!!
         !!  shift=h*0.1d0 !0.01d0
@@ -219,43 +180,7 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
         !!!!!!!!!!!!   solve problem   !!!!!!!!!!!!!!!!!!!!!!!!!!
         select case (fp_solver)
         case (0)
-            !if(time.gt.0.303)then 
-                if(nomer.eq.67)then
-                    open(74, file='ybegd67.dat',status='old')
-                    do i=1, this%n+1
-                        read(74,*) fff, this%d1(i),this%d2(i),this%d3(i)
-                    end do
-                    close(74)
-
-                end if
-            !end if
-            if(time.gt.0.3005)then 
-                if(nomer.eq.67)then
-                    open(74, file='lhcd/out/ybegd0.dat')
-                    do i=1, this%n+1
-                        write(74,*) y(i), this%d1(i),this%d2(i),this%d3(i)
-                    end do
-                    close(74)
-
-                end if
-            end if
             call savelyev_solver(this%alfa2, nt, this%h, dt, this%n, ybeg, yend, this%d1, this%d2, this%d3, y)
-            if(time.gt.0.3005)then
-                if(nomer.eq.67)then
-                    open(74, file='lhcd/out/yend.dat')
-                    do i=1, this%n+1
-                        write(74,*) y(i), this%d1(i),this%d2(i),this%d3(i)
-                    end do
-                    close(74)
-                    open(74, file='lhcd/out/nthdt.dat',position="append")
-                    do i=1, this%n+1
-                        write(74,*) nt, this%h,dt,this%n
-                    end do
-                    close(74)
-                    write(*,*)'time=',time
-                    PAUSE
-                end if
-            end if
         case (1)
             call chang_cooper_solver(this%alfa2, nt, this%h, dt, this%n, ybeg, yend, this%d1,this%d2,this%d3, y)
         case DEFAULT
@@ -292,7 +217,7 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
       !if (present(dfj0)) then
       !    call burying_procedure(vj, fj0, dfj0)
       !else 
-      !call burying_procedure(this%v, this%f)
+      call burying_procedure(this%v, this%f)
       !end if
   
   
@@ -300,7 +225,7 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
 
 
     subroutine burying_procedure(v, f0, df0)
-        !! процедура закапывания
+        !! РїСЂРѕС†РµРґСѓСЂР° Р·Р°РєР°РїС‹РІР°РЅРёСЏ
         use math_module
         implicit none
         real*8,  intent(in)     :: v(:)        
@@ -322,7 +247,7 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
         df(1)=0d0
         df(i0)=(f(i0)-f(i0-1))/v(2)
     
-    !   сдвиг расределения вправо. зачем-то ???
+    !   СЃРґРІРёРі СЂР°СЃСЂРµРґРµР»РµРЅРёСЏ РІРїСЂР°РІРѕ. Р·Р°С‡РµРј-С‚Рѕ ???
         ii=0
         ibeg=0
         do i=i0-1,1,-1

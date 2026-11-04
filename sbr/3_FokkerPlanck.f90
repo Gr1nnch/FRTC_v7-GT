@@ -5,28 +5,41 @@ module FokkerPlanck_module
 contains
     !! calculation of distribution functions at time t1=t+dtau !!
 subroutine fokkerplanck_compute(time, TAU)
-    use FokkerPlanck1D_mod, only: FokkerPlanck1D
-    use rt_parameters, only: nr, save_interval
-    use writer_module, only: write_v_array, binary_write_array
-    use maxwell, only: jindex, kindex, flag_d0
-    use nr_grid, only: vij, fij, fij0, dij, dfij
+    use FokkerPlanck1D_mod
+    use utils
+    use rt_parameters
+    use writer_module
+    use maxwell  
     use plasma, only : fvt, enorm, fst
     implicit none
 
     type(FokkerPlanck1D) fokker_planck
+    !type(Timer) my_timer
     real(wp), intent(in) :: time, TAU
     real(wp) t, dtstep, dtau
+    !integer nr
+    !common /a0ab/ nr
     integer, parameter :: ntau = 10
+    !integer i0
+    !parameter(i0=1002)
+    !real(wp) vij,fij0,fij,dfij,dij,enorm,fst
+    !common/lh/vij(i0,100),fij0(i0,100,2),fij(i0,100,2),dfij(i0,100,2), dij(i0,100,2),enorm(100),fst(100)
     integer n,i,j,it,nt,k
     real(wp) xend,h,dt
     real(wp) znak,alfa2,dt0,h0,r
-    real(wp), save  :: last_time_saving = 0
+    !common/ef/ alfa2
+    
+    !real(wp) d0
+    !integer jindex,kindex
+    !common/dddql/ d0,jindex,kindex
     parameter(dt0=0.1d0,h0=0.1d0)
 
     dtstep=TAU/dble(ntau) !seconds 
 
     print *, 'fokkerplanck_compute'
     write(*,*)'time=',time,' dt=',dtstep
+
+    !call my_timer%start
 
     do j=1, nr
         jindex=j  !common/dddql/ 
@@ -45,7 +58,7 @@ subroutine fokkerplanck_compute(time, TAU)
             fokker_planck = FokkerPlanck1D(znak*enorm(j), xend, vij(:,j), fij0(:,j,k))
             call fokker_planck%init_zero_diffusion
             do i=1, ntau
-                call fokker_planck%solve_time_step(dt, nt, time,0)
+                call fokker_planck%solve_time_step(dt, nt)
                 !call fokkerplanck1D_iter(alfa2, h, n, dt, nt, xend, d1, d2, d3, vij(:,j), fij0(:,j,k), out_fj)
             end do
             fij0(:,j,k) = fokker_planck%f
@@ -54,22 +67,18 @@ subroutine fokkerplanck_compute(time, TAU)
             fokker_planck = FokkerPlanck1D(znak*enorm(j), xend, vij(:,j), fij(:,j,k))
             call fokker_planck%init_diffusion(dij(:,j,k))
             do i=1, ntau
-                call fokker_planck%solve_time_step(dt, nt, time,j)
+                call fokker_planck%solve_time_step(dt, nt)
                 !call fokkerplanck1D_iter(alfa2, h, n, dt, nt, xend, d1, d2, d3, vij(:,j), fij(:,j,k),out_fj, dfij(:,j,k))
             end do
             fij(:,j,k) = fokker_planck%f
-            !call fokker_planck%eval_f_derivate(dfij(:,j,k))
         end do
     end do
 
-    write(*,*)'fokkerplanck nr= ', nr, ' ntau =', ntau, 'nt =', nt
-    if ((time - last_time_saving)>=save_interval) then
-        call binary_write_array(vij, fij0(:,1:nr,:), time, 'maxwell_fij0')
-        call write_v_array(vij, fij(:,1:nr,:),  time, 'maxwell')
-        call write_v_array(vij, dfij(:,1:nr,:), time, 'f_derivative')
-        call write_v_array(vij,  dij(:,1:nr,:), time, 'diffusion')
-        last_time_saving= time
-    endif
+    write(*,*)'fokkerplanck nr= ',nr,' ntau =',ntau, 'nt =', nt
+
+    call binary_write_array(vij, fij0(:,1:nr,:), time, 'maxwell_fij0')
+    call write_v_array(vij, fij(:,1:nr,:), time, 'maxwell')
+    call write_v_array(vij,  dij(:,1:nr,:), time, 'diffusion')
     !call write_matrix(dij(1:i0,1:nr,1), time, 'diffusion')
     !time2 = sys_time() - time1
     !call my_timer%stop
@@ -81,7 +90,7 @@ subroutine fokkerplanck_compute(time, TAU)
 
 
  subroutine init_diffusion(h, n, vj, dj, d1, d2, d3)
-    ! инициализация диффузии для схемы савельева
+    ! РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґРёС„С„СѓР·РёРё РґР»СЏ СЃС…РµРјС‹ СЃР°РІРµР»СЊРµРІР°
     use lock_module
     implicit none
     integer, intent(in) :: n

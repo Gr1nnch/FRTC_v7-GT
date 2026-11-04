@@ -3,7 +3,7 @@ module spectrum_mod
     implicit none    
 
     type SpectrumPoint
-        !real(wp) nz и ny не нужны
+        !real(wp) nz Рё ny РЅРµ РЅСѓР¶РЅС‹
         ! 
         !real(wp) ny
         !
@@ -23,13 +23,13 @@ module spectrum_mod
         real(wp) input_power
         !! power of spectrum
         real(wp) power_ratio
-        !! доля входной мощности
+        !! РґРѕР»СЏ РІС…РѕРґРЅРѕР№ РјРѕС‰РЅРѕСЃС‚Рё
         real(wp) max_power
         !!
         real(wp) sum_power
-        !! суммарная power        
+        !! СЃСѓРјРјР°СЂРЅР°СЏ power        
         integer direction
-        !! направление спектра   +1 или -1 или 0 - полный
+        !! РЅР°РїСЂР°РІР»РµРЅРёРµ СЃРїРµРєС‚СЂР°   +1 РёР»Рё -1 РёР»Рё 0 - РїРѕР»РЅС‹Р№
         type(SpectrumPoint), allocatable ::  data(:)
         !! 
     contains
@@ -47,7 +47,7 @@ module spectrum_mod
     end interface Spectrum    
 contains
     function spectrum_constructor(size) result(this)
-        !- конструктор для spectrum
+        !- РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ РґР»СЏ spectrum
         implicit none
         type(Spectrum) :: this
         integer, value :: size
@@ -67,7 +67,7 @@ contains
         integer i
         max_power = 0
         pnorm = this%input_power*xsgs/ntet
-        print *, 'pnorm =', pnorm        
+        print *, 'pnorm =', pnorm, 'pow=',this%input_power,'xsgs=',xsgs     
         do i = 1, this%size
             p = this%data(i)
             p%power = p%power*pnorm
@@ -81,8 +81,8 @@ contains
     end subroutine
 
     function integral_trapez_method(this) result(sum)
-        !! вычисление полной мощности спектра
-        !! интегрирование методом трапеций
+        !! РІС‹С‡РёСЃР»РµРЅРёРµ РїРѕР»РЅРѕР№ РјРѕС‰РЅРѕСЃС‚Рё СЃРїРµРєС‚СЂР°
+        !! РёРЅС‚РµРіСЂРёСЂРѕРІР°РЅРёРµ РјРµС‚РѕРґРѕРј С‚СЂР°РїРµС†РёР№
         implicit none
         class(Spectrum),  intent(in) :: this
         real(wp) :: sum
@@ -112,7 +112,7 @@ contains
         end do
         max_power = 0
         pnorm = this%input_power*xsgs/ntet/p_sum
-        print *, 'pnorm =', pnorm        
+        print *, 'pnorm =', pnorm, 'pow=',this%input_power,'xsgs=',xsgs,'ps=',p_sum       
         do i = 1, this%size
             p = this%data(i)
             p%power = p%power*pnorm
@@ -201,7 +201,7 @@ contains
     end function get_negative_part_method
 
     function read_spectrum(file_name) result(spectr)
-        !- чтение spectrum из файла
+        !- С‡С‚РµРЅРёРµ spectrum РёР· С„Р°Р№Р»Р°
         implicit none
         type(Spectrum) :: spectr
         character (len = *), value :: file_name 
@@ -265,7 +265,7 @@ contains
     end subroutine write_spectrum
 
     subroutine divide_spectrum(spectr, pos_spectr, neg_spectr)
-        !! деление спектра на две части
+        !! РґРµР»РµРЅРёРµ СЃРїРµРєС‚СЂР° РЅР° РґРІРµ С‡Р°СЃС‚Рё
         implicit none
         type(Spectrum), intent(in)  :: spectr
         type(Spectrum), intent(out) :: pos_spectr, neg_spectr
@@ -337,7 +337,7 @@ contains
             allocate(ynzm0(ispl),pm0(ispl))
             allocate(yn2z(ispl),powinp(ispl))
             if (spectr%size<nnz) then
-                print *, 'Спектр слишком меленький для аппроксимации'
+                print *, 'РЎРїРµРєС‚СЂ СЃР»РёС€РєРѕРј РјРµР»РµРЅСЊРєРёР№ РґР»СЏ Р°РїРїСЂРѕРєСЃРёРјР°С†РёРё'
                 print *, 'spectr size < nnz. '
                 print *, spectr%size, nnz
                 stop

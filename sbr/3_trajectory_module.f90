@@ -3,168 +3,55 @@ module trajectory_module
     use trajectory_data
     implicit none
 
-    !integer, parameter :: max_num_trajectories = 30000
-    !type(Trajectory), target ::  trajectories(max_num_trajectories)
-    integer :: number_of_trajectories
-    type(Trajectory), allocatable, target ::  trajectories(:)
+    !integer, parameter :: mpnt = 100000
+
+
+    !integer nrefj(mpnt)
+    !!common/refl/nrefj(mpnt)
+
+    !integer mbeg(mpnt),mend(mpnt),mbad(mpnt)
+
+    integer, parameter :: max_num_trajectories = 30000
+    type(Trajectory), target ::  trajectories(max_num_trajectories)
 contains
 
-
-
-    !real(wp) function rini(xm, tet, point, ifail) !sav2009
-    subroutine rini(traj, point, iw0)
-        !! вычисление начальной точки входа луча
-        use constants, only : zero
-        use rt_parameters, only : inew, nr, iw, spectrum_coordinate_system
-        use spectrum_mod, only : SpectrumPoint
-        use decrements, only : dhdnr 
-        use dispersion_module, only: ivar, yn3, izn, znakstart
-        use dispersion_module, only: find_all_roots, dhdomega
-        use metrics, only: g22, g33, co, si
-        use metrics, only: calculate_metrics
-        use driver_module, only: irs
-        use trajectory_data
-        implicit none
-        
-        class(Trajectory), intent(inout) :: traj
-        type(SpectrumPoint), intent(in)  :: point
-        integer, intent(in)              :: iw0
-        real(wp)  :: xm
-        real(wp)  :: tet 
-
-        integer :: ntry
-        real(wp) :: pa, prt, prm, hr 
-
-        real(wp),  parameter :: rhostart=1.d0
-        integer,   parameter :: ntry_max=5
-        integer :: num_roots
-        real(wp) :: xnr_root(4)
-        real(wp) :: znak
-        irs = 1
-        iw = iw0
-        izn = 1
-        hr = 1.d0/dble(nr+1)
-        tet = traj%tetin
-
-        ntry = 0
-        pa = rhostart
-        do while (ntry.lt.ntry_max.and.pa.ge.2d0*hr)
-            pa = rhostart-hr*dble(ntry)-1.d-4
-            ntry = ntry+1
-
-            ! вычисление g22 и g33
-            call calculate_metrics(pa, tet)
-
-            select case(spectrum_coordinate_system)
-            case(0) ! toroidal coordinates
-                yn3 = point%Ntor*dsqrt(g33)
-                xm  = point%Npol*dsqrt(g22)
-            case(1) ! magnetic coordinates
-                yn3 = point%Ntor*dsqrt(g33)/co 
-                xm  = point%Npol*dsqrt(g22)/si
-            case DEFAULT
-                print *, 'bad spectrum coordinate system'
-                stop
-            end select  
-
-            num_roots = find_all_roots(pa,xm,tet,xnr_root)
-             
-            if (num_roots>0) then
-                ! определение znakstart
-                znak = dhdomega(pa,tet,xnr_root(1),xm)
-                izn = 1
-                if(-znak*dhdnr.gt.zero) then
-                    izn=-1
-                    znak = dhdomega(pa,tet,xnr_root(2),xm)
-                    if(-znak*dhdnr.gt.zero) then
-                        write(*,*)'Exception: both modes go outward !!'
-                        stop
-                    end if
-                endif
-                traj%rin = pa
-                traj%tetzap = tet
-                traj%xmzap = xm
-                traj%rzap = pa
-                traj%yn3zap = yn3 
-                traj%irszap = irs 
-                traj%iwzap = iw
-                traj%iznzap = izn
-                traj%znakstart = znak ! оказалось,что нужно запоминать. znakstart используется в ext4
-                return
-            end if
-        end do
-        !print *, 'error: no roots'
-        traj%mbad = 1 ! плохоая траектория
-    end      
-
-
-subroutine init_trajectories(iw0, spectr)
+subroutine init_trajectory
     use constants
-    use rt_parameters, only: max_number_of_traj
-    use rt_parameters, only: nr, kv, ntet
     use driver_module
-    use plasma, only: tet1, tet2, gap_tet_minus, gap_tet_plus
-    use spectrum_mod
     implicit none
-    integer,intent(in)         :: iw0
-    type (Spectrum),intent(in) :: spectr
-    type (SpectrumPoint) point
-    integer itet, inz, tet_count
-    real(wp) htet
-    real(wp) tetin
-    real(wp) power_coeff
-    if (allocated(trajectories)) deallocate(trajectories)
-    allocate(trajectories(max_number_of_traj))
+    !nrefj = 0
+    
+    !dland = zero
+    !dcoll = zero
+    !perpn = zero 
+    !dalf  = zero
+    !vel = zero
+    !jrad = zero
+    !iww = zero
+    !tetai = zero
+    !xnpar = zero
+    !izz = zero
 
-    if (ntet.ne.1) htet = (tet2-tet1)/(ntet-1)
-    !-----------------------------------------
-    !    find initial radius for a trajectory
-    !    on the 1th iteration
-    !-----------------------------------------
-    number_of_trajectories = 0 
-    tet_count = 0 
-    do itet = 1,ntet
-        tetin = tet1+htet*(itet-1)
-        !if (abs(tetin)<abs(tet1/4)) cycle
-        if ((gap_tet_minus<tetin).and.(tetin<gap_tet_plus)) cycle
-        tet_count = tet_count + 1
-        do inz = 1, spectr%size
-            number_of_trajectories = number_of_trajectories+1
-            if (number_of_trajectories>max_number_of_traj) then
-                print *, "number_of_trajectories = ", number_of_trajectories
-                print *, "The limit on the number of trajectories has been exceeded"
-                stop
-            endif     
-            current_trajectory => trajectories(number_of_trajectories)
-            point = spectr%data(inz)
-            call current_trajectory%init(tetin, inz)
-            call rini(current_trajectory, point, iw0)
-        enddo
-    enddo
-    power_coeff = float(ntet)/float(tet_count)
-    do inz = 1, spectr%size
-        point = spectr%data(inz)
-        point%power = point%power * power_coeff
-    enddo
+    !mbeg = zero
+    !mend = zero
+    !mbad = zero
 
 end subroutine 
 
-subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
+subroutine view(tview, ispectr,nnz,ntet) !sav2008
 !!!writing trajectories into a file
     use constants
     use approximation
     use plasma
-    use xpoint
     use decrements, only: pdec1,pdec2,pdec3,pdecv,pdecal,dfdv
     use decrements, only: zatukh
-    use rt_parameters, only :  nr, itend0, kv, nmaxm, traj_len_seved, save_interval
-    use small_vgrid, only : dflf, dfrt, distr
+    use rt_parameters, only :  nr, itend0, kv, nmaxm, traj_len_seved
+    use iterator_mod, only : dflf, dfrt, distr
     use driver_module !, only: jrad, iww, izz, length
     use trajectory_data
     implicit none
     
     real(wp), intent(in) :: tview
-    real(wp) :: addx, addz
 
     integer, intent(in) :: ispectr, nnz, ntet  !sav#
 
@@ -183,7 +70,7 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
     integer, parameter :: m=7
     real(wp), parameter :: pleft=1.d-10 !m may be chaged together with name(m)
 
-    real(wp) :: h, xr, xdl, xdlp, xly, xlyp, xgm, xgmp, th
+    real(wp) :: htet, h, xr, xdl, xdlp, xly, xlyp, xgm, xgmp, th
     real(wp) :: x, xx, z, zz, pl, pc, pa
     real(wp) :: pdec1z, pdec3z, pintld, pintal
     real(wp) :: cotet, sitet
@@ -191,9 +78,6 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
     real(wp) :: df, powpr, powd, powal, pil, pic
     real(wp) :: powcol, pia, pt, denom, powdamped, domin, fff
     real(wp) :: pow 
-    real(wp), save  :: last_time_saving_pos = 0
-    real(wp), save  :: last_time_saving_neg = 0
-    real(wp) :: delta_time
     character(14) folder
     character(40) ver_fn
     character(40) fname
@@ -202,10 +86,8 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
     !print *, name(m)
     if (ispectr>0) then
         folder = "lhcd/traj/pos/"
-        delta_time = tview - last_time_saving_pos
     else
         folder = "lhcd/traj/neg/"
-        delta_time = tview - last_time_saving_neg
     endif
 
     write(ver_fn,'(A, "v2")') folder
@@ -215,28 +97,22 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
     close(1)
 
     write(fname,'(A, f9.7,".dat")') folder, tview
-    
-    print *, 'traj file:', fname, delta_time
-    if (delta_time<save_interval) then 
-        print *,  "skip saving"
-        return
-    endif
-    if (ispectr>0) then
-        last_time_saving_pos = tview
-    else
-        last_time_saving_neg = tview 
-    endif
+    print *, fname
+
     if (traj_len_seved == 0) then
         return
     endif
 
+
+    htet=zero
     h=1d0/dble(nr+1)
+    if(ntet.ne.1) htet=(tet2-tet1)/(ntet-1)
+
 
     open(1,file=fname)
 
     ntraj=0 !sav2008
-    !do itr=1,nnz*ntet !sav2008
-    do itr=1, number_of_trajectories
+    do itr=1,nnz*ntet !sav2008
         pow=1.d0
         pl=zero
         pc=zero
@@ -325,11 +201,6 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
                 xgm=fdf(xr,cgm,ncoef,xgmp)
                 xx=-xdl+xr*cotet-xgm*sitet**2
                 zz=xr*xly*sitet
-                if(-5.gt.0)then
-                    call xpnt_coord(xr, th + 1.5d0*pi, addx, addz)
-                    xx = -xdl + xr*cotet - xgm*sitet**2 + addx
-                    zz =  xr*xly*sitet + addz
-                end if
                 x=(r0+rm*xx)/1d2
                 z=(z0+rm*zz)/1d2 
                 jdlt=jr-jrc
@@ -533,7 +404,7 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
             eps=eps/5d0
             rrange=rrange*2d0
             hdrob=hdrob*2d0
-            call current_trajectory%reset(inak_saved) ! костыль - восстанавливаю занчение счетчика точек траектории
+            call current_trajectory%reset(inak_saved) ! РєРѕСЃС‚С‹Р»СЊ - РІРѕСЃСЃС‚Р°РЅР°РІР»РёРІР°СЋ Р·Р°РЅС‡РµРЅРёРµ СЃС‡РµС‚С‡РёРєР° С‚РѕС‡РµРє С‚СЂР°РµРєС‚РѕСЂРёРё
             goto 40
         end if
         !-------------------------------------

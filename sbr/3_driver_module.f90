@@ -85,9 +85,9 @@ contains
         tp%tetai = cf2 ! tet_i
         radth=dble(j)/dble(nr) !!! 
         tp%vthc = 3.d10/fvt(radth)
-        tp%iww = icf1 ! было ifast 
-        tp%izz = icf2 ! было idir
-        tp%xnpar = cf3 !было xparn
+        tp%iww = icf1 ! Р±С‹Р»Рѕ ifast 
+        tp%izz = icf2 ! Р±С‹Р»Рѕ idir
+        tp%xnpar = cf3 !Р±С‹Р»Рѕ xparn
         tp%driver = driver
         tp%ipow = ipow
         !print *,'driver=', driver, current_trajectory%size
@@ -138,7 +138,7 @@ contains
         real(wp) :: x, xold
         real(wp) :: h, hsav, hdid, hnext
         real(wp) :: dstsav, dyd, dst3, dst2, dst1
-        real(wp) :: ynz0 !!!!!! проверить значение
+        real(wp) :: ynz0 !!!!!! РїСЂРѕРІРµСЂРёС‚СЊ Р·РЅР°С‡РµРЅРёРµ
         real(wp) :: powccc
         integer  :: i, ii, irep, nstp
         x=x1
@@ -287,12 +287,12 @@ contains
         use constants, only: clt, zero
         use rt_parameters, only: itend0, kv
         use plasma, only: fvt, vperp
-        use power,  only: dfind
+        use current, only: dfind
         use dispersion_module, only: ipow
         use decrements, only: vfound
         use decrements, only: cf1, cf2, cf3, cf4, cf5, cf6
         use decrements, only: icf1,icf2
-        use small_vgrid, only: vlf,vrt,dflf,dfrt
+        use iterator_mod, only: vlf,vrt,dflf,dfrt
         use decrements, only: zatukh ! function zatukh(psy,j,u,n)
         use decrements, only: pdec1,pdec2,pdec3,pdecv,pdecal,dfdv
         implicit none
@@ -390,7 +390,7 @@ contains
         real(wp) :: yerr(nmax),ysav(nmax),yseq(nmax)
         logical  :: first, reduct
 
-        save a,alf,epsold,first,kmax,kopt,nseq,xnew !!! зачем save ?????
+        save a,alf,epsold,first,kmax,kopt,nseq,xnew !!! Р·Р°С‡РµРј save ?????
         
         real(wp) :: dyd
         integer  :: ii
@@ -583,7 +583,7 @@ contains
         integer  :: j,k
         real(wp) :: b,b1,c,ddy,v,yy
         real(wp) :: d(nmax,imax),fx(imax),x(imax)
-        save d,x !! зачем save ????
+        save d,x !! Р·Р°С‡РµРј save ????
         x(iest)=xest
         if(iest.eq.1) then
             do j=1,nv
@@ -746,7 +746,7 @@ contains
                 izn=-izn
                 call disp2_ivar3(y(3),y(2),y(1),xnr)
                 if(ivar.eq.-1) then !out of dispersion curve - restart
-                    !print *, 'out of dispersion curve - restart'
+                    print *, 'out of dispersion curve - restart'
                     do i=1,nvar
                         y(i)=ystart(i)
                     end do

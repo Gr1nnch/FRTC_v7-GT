@@ -19,7 +19,6 @@ contains
         use approximation
         use plasma
         use rt_parameters
-        use xpoint
         implicit none
         real(wp), intent(in) :: pa
         real(wp), intent(in) :: ptet
@@ -45,9 +44,6 @@ contains
         dxdtdt=-pa*cotet-two*xgm*(cotet**2-sitet**2)
         dzdtdt=-xly*pa*sitet
         x0t=dxdt
-        if(-5.gt.0) then !!!!!!!!!!!xtochk
-            call xpnt(pa,ptet+1.5d0*pi,dxdr,dxdt,dzdr,dzdt,x0,dxdrdt,dxdtdt,dzdrdt,dzdtdt,x0t)
-        end if
         !--------------------------------------
         ! components of metric tensor
         !--------------------------------------
@@ -115,7 +111,7 @@ contains
         end if
         wpq=c0**2*pn ! 
         whe=b*c1     !
-        v=wpq/ww**2  ! квадрат плазменной частоты на частоту волны
+        v=wpq/ww**2  ! РєРІР°РґСЂР°С‚ РїР»Р°Р·РјРµРЅРЅРѕР№ С‡Р°СЃС‚РѕС‚С‹ РЅР° С‡Р°СЃС‚РѕС‚Сѓ РІРѕР»РЅС‹
         u1=whe/ww    ! 
         u=u1**2
         
@@ -279,7 +275,6 @@ end module partial_derivatives
 
 module decrements
     use kind_module
-    use nr_grid, only: MAX_NR
     implicit none
     real(wp) :: dnx
     real(wp) :: dhdnr
@@ -293,10 +288,10 @@ module decrements
     real(wp) :: cf1,cf2,cf3,cf4,cf5,cf6
     !!common /eg3/ cf1,cf2,cf3,cf4,cf5,cf6
 
-    real(wp) :: dgdu(50,MAX_NR)
-    integer  :: kzero(MAX_NR)
+    real(wp) :: dgdu(50,100)
+    integer  :: kzero(100)
     !!common /arr/ dgdu(50,100),kzero(100)
-    !! используется в zatukh, ourlhcd2017 и alphas
+    !! РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ zatukh, ourlhcd2017 Рё alphas
 
 contains
     subroutine calculate_decrements(pa, yn2, ptet, yn3, ynpopq,  xnr, jr, izn)
@@ -310,7 +305,7 @@ contains
         use metrics
         use dielectric_tensor
         use dispersion_equation, only : as, bs, yny, ynz, ynzq
-        use small_vgrid, only: distr
+        use iterator_mod, only: distr
         use source_new_mod, only: source_new
         implicit none
         real(wp), intent(in) :: pa, yn2, ptet, yn3, ynpopq, xnr
@@ -430,6 +425,9 @@ module dispersion_module
     integer :: ivar
     !!common /bdeo/ ivar   
 
+    integer :: icall1, icall2
+    !common /aef2/ icall1,icall2        
+
     integer  :: izn
     !!common /abcde/ izn
 
@@ -486,7 +484,8 @@ contains
             pause
             !goto 70
         endif
-          
+        icall1=icall1+1
+        
         call calculate_metrics(pa, ptet)
 
         call calculate_dielectric_tensor(pa)
@@ -526,7 +525,7 @@ contains
                 ivar=-1
                 return
             end if
-            !print *, 'reflection'
+            print *, 'reflection'
             !pause
             iw=-iw
             ivar=10
@@ -584,7 +583,8 @@ contains
         iconv=0
         irefl=0
         if(pa.ge.one.or.pa.le.zero) goto 70
-
+        icall1=icall1+1
+        
         call calculate_metrics(pa, ptet)
 
         call calculate_dielectric_tensor(pa)
@@ -666,6 +666,7 @@ contains
             return
         endif
 
+        icall1=icall1+1
         
         call calculate_metrics(pa, ptet)
 
@@ -756,7 +757,7 @@ contains
 
     function find_all_roots(pa, yn2, ptet, root) result(num_roots)
         !! find all roots of dispersion equation
-        !! уточненный вариант вычисления корней
+        !! СѓС‚РѕС‡РЅРµРЅРЅС‹Р№ РІР°СЂРёР°РЅС‚ РІС‹С‡РёСЃР»РµРЅРёСЏ РєРѕСЂРЅРµР№
         use constants, only: zero, one, two
         use rt_parameters, only: iw
         use metrics
@@ -782,10 +783,11 @@ contains
         irefl=0
         if(pa.ge.one.or.pa.le.zero) then
             print *, 'find_all_roots'
-            !pause
+            pause
             return
         endif
 
+        icall1=icall1+1
         
         call calculate_metrics(pa, ptet)
 
@@ -837,7 +839,7 @@ contains
 
     function find_all_roots_test(pa, yn2, ptet, root) result(num_roots)
         !! find all roots of dispersion equation
-        !! уточненный вариант вычисления корней
+        !! СѓС‚РѕС‡РЅРµРЅРЅС‹Р№ РІР°СЂРёР°РЅС‚ РІС‹С‡РёСЃР»РµРЅРёСЏ РєРѕСЂРЅРµР№
         use constants, only: zero, one, two
         use rt_parameters, only: iw
         use metrics
@@ -867,6 +869,8 @@ contains
             return
         endif
 
+        icall1=icall1+1
+        
         call calculate_metrics(pa, ptet)
 
         call calculate_dielectric_tensor(pa)
@@ -997,7 +1001,6 @@ contains
         use dispersion_equation, only: ynz
         use decrements, only : dhdnr !!!!!
         use source_new_mod, only: source_new
-        use xpoint
         implicit none
         real(wp), intent(in)    :: in_pa   ! ro
         real(wp), intent(in)    :: yn2     ! ???
@@ -1043,6 +1046,7 @@ contains
         real(wp) :: source
         real(wp) :: aimh
         !common /bcef/ ynz,ynpopq
+        !common /aef2/ icall1,icall2
 
         !integer :: irefl, iconv
         !common /cefn/ iconv,irefl
@@ -1054,7 +1058,7 @@ contains
         pa = in_pa
         irefl=0
         iconv=0
-        if(pa.eq.zero) pa=1.d-7 ! TODO не хорошо, что изменяется pa
+        if(pa.eq.zero) pa=1.d-7 ! TODO РЅРµ С…РѕСЂРѕС€Рѕ, С‡С‚Рѕ РёР·РјРµРЅСЏРµС‚СЃСЏ pa
         if(pa.lt.zero) pa=dabs(pa)
         !sav2008      if(pa.gt.one) then
         !sav2008       dhdm=666d0
@@ -1065,7 +1069,8 @@ contains
         !sav2008       return
         !sav2008      end if
   
-          !!      pn=fn1(pa,fnr)
+        icall2=icall2+1
+        !!      pn=fn1(pa,fnr)
         !!      pn=fn2(pa,fnr,fnrr)
         if(inew.eq.0) then !vardens
          pn=fn1(pa,fnr)
@@ -1106,9 +1111,6 @@ contains
         dzdrdt=dzdtdr
         x0t=dxdt
         x0r=dxdr
-        if(-5.gt.0) then !!!!!!!!!!!xtochk
-            call xpnt2(pa,ptet+1.5d0*pi,dxdr,dxdt,dzdr,dzdt,x0,dxdrdt,dxdtdt,dzdrdt,dzdtdt,x0t,dxdrdr,dxdtdr,dzdrdr,dzdtdr,x0r)
-        end if
         g11=dxdr**2+dzdr**2
         g22=dxdt**2+dzdt**2
         g12=dxdr*dxdt+dzdr*dzdt
@@ -1321,7 +1323,7 @@ contains
 
 
     function dhdomega(rho,theta,yn1,yn2) result(znak) 
-        !! вычисляет znakstart
+        !! РІС‹С‡РёСЃР»СЏРµС‚ znakstart
         use decrements, only : dhdnr !!!!!
         implicit none
         real(wp), intent(in) :: rho
@@ -1378,7 +1380,7 @@ contains
         dydx(2)=znak*dhdtet/ddn
         dydx(3)=-znak*dhdnr/ddn
         dydx(4)=znak*dhdr/ddn
-        !dydx(5)=-znak*dhdn3/ddn !! возможен выход за границы массива
+        !dydx(5)=-znak*dhdn3/ddn !! РІРѕР·РјРѕР¶РµРЅ РІС‹С…РѕРґ Р·Р° РіСЂР°РЅРёС†С‹ РјР°СЃСЃРёРІР°
   
         !c      dydx(1)=znak*dhdm/ddn
         !c      dydx(2)=-znak*dhdtet/ddn

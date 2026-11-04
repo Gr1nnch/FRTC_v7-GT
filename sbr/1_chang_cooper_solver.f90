@@ -4,7 +4,7 @@ module chang_cooper_module
     
 contains
 subroutine chang_cooper_solver(alfa2, nt, h, dt, n, ybeg, yend, d1,d2,d3, y)
-    ! схема Ченга-Купера для уравнения Фоккера-Планка
+    ! СЃС…РµРјР° Р§РµРЅРіР°-РљСѓРїРµСЂР° РґР»СЏ СѓСЂР°РІРЅРµРЅРёСЏ Р¤РѕРєРєРµСЂР°-РџР»Р°РЅРєР°
     implicit none
     real(wp), intent(in)  :: alfa2      
     integer, intent(in) :: nt, n
@@ -120,7 +120,7 @@ end
 
 
 subroutine tridag(a,b,c,r,u,n)
-    !! создает трехдиагональнйю матрицу
+    !! СЃРѕР·РґР°РµС‚ С‚СЂРµС…РґРёР°РіРѕРЅР°Р»СЊРЅР№СЋ РјР°С‚СЂРёС†Сѓ
     implicit none
     integer, intent(in)    :: n
     real(wp),  intent(in)    :: a(n), b(n), c(n), r(n)

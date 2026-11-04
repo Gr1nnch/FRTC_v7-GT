@@ -78,7 +78,7 @@ module rt_parameters
 !!!!!!!!!!!!!  options !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     integer ::  ipri
     !! ipri, printing output monitoring: 0,1,2,3,4
-    integer ::  iw, iw_start
+    integer ::  iw
     !! iw, initial mode (slow=1, fast=-1)
     integer ::  ismth
     !! ismth, if=0, no smoothing in Ne(rho),Te(rho),Ti(rho)
@@ -98,10 +98,6 @@ module rt_parameters
     !! Zplus,    upper grill corner in centimeters
     real(wp) ::  zminus
     !! Zminus,   lower grill corner in centimeters
-    real(wp) ::  ZGapPlus
-    !! ZGapPlus -  upper grill gap corner in centimeters
-    real(wp) ::  ZGapMinus
-    !! ZGapMinus - lower grill gap corner in centimeters
     integer ::   ntet
     !! ntet,     theta grid number
     integer ::   nnz
@@ -126,12 +122,7 @@ module rt_parameters
     !! - 1 save all
     !! 0 don't save
     !! >1 length seved
-    integer :: max_number_of_traj
-    !! maximum number of trajectories
-    integer :: max_size_of_traj
-    !! maximum length of trajectories
-    real(wp) :: save_interval
-    !! time interval of saving traj and distrb
+    
     contains      
     subroutine show_parameters()          
       print*, "Freq = ", freq          
@@ -151,10 +142,6 @@ module rt_parameters
       print*, "upl_fix = ", upl_fix
       print*, "upl_value = ", upl_value 
       print*, "fp_solver = ", fp_solver 
-      print*, "max_number_of_traj = ", max_number_of_traj 
-      print*, "max_size_of_traj = ", max_size_of_traj       
-      print*, "save_interval = ", save_interval       
-      
 
       print*, "---------- spectrum --------------"
       print*, "spectrum_type = ", spectrum_type
@@ -188,9 +175,8 @@ module rt_parameters
         maxstep2, maxstep4
         namelist /options/ ipri, iw, ismth, ismthalf, ismthout, inew, itor, ipol, &
             upl_fix, upl_value, &
-            fp_solver, traj_len_seved, &
-            max_number_of_traj, max_size_of_traj, save_interval
-        namelist /grill_parameters/ Zplus, Zminus, ZGapPlus, ZGapMinus, ntet, nnz
+            fp_solver, traj_len_seved
+        namelist /grill_parameters/ Zplus, Zminus, ntet, nnz
         namelist /spectrum/ spectrum_type, spectrum_PWM, spectrum_coordinate_system 
         ! Namelist definition===============================
 
@@ -208,7 +194,6 @@ module rt_parameters
         read (nml=grill_parameters, iostat=iostat, unit=file_unit)
         read (nml=spectrum, iostat=iostat, unit=file_unit)
 
-        iw_start = iw
         pabs0 = pabs
         eps_const = eps
         i_pol = ipol

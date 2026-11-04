@@ -1,6 +1,6 @@
 module constants 
-    !! модуль с математическими и физическими константами
-    !! nt_001 тестовый комментарий
+    !! РјРѕРґСѓР»СЊ СЃ РјР°С‚РµРјР°С‚РёС‡РµСЃРєРёРјРё Рё С„РёР·РёС‡РµСЃРєРёРјРё РєРѕРЅСЃС‚Р°РЅС‚Р°РјРё
+    !! nt_001 С‚РµСЃС‚РѕРІС‹Р№ РєРѕРјРјРµРЅС‚Р°СЂРёР№
     use kind_module
     implicit none
 
@@ -13,7 +13,7 @@ module constants
     real(wp), parameter :: tiny1  = 1e-7_wp
     
 
-    real(wp), parameter :: pi = acos(-one) !! число Пи = 3.1415....
+    real(wp), parameter :: pi = acos(-one) !! С‡РёСЃР»Рѕ РџРё = 3.1415....
     real(wp), parameter :: pi2 = 2.0_wp*pi
     real(wp), parameter :: pi4 = 4.0_wp*pi
     real(wp), parameter :: piq = sqrt(pi)
@@ -24,7 +24,7 @@ module constants
     real(wp), parameter :: zalfa  = 2.0_wp    !! alpha particles' electrical charge
     real(wp), parameter :: xmalfa = 4.0_wp  !! alpha particles' atomic mass
 
-    real(wp), parameter :: clt = 3.0e+10_wp  !! скорость света
+    real(wp), parameter :: clt = 3.0e+10_wp  !! СЃРєРѕСЂРѕСЃС‚СЊ СЃРІРµС‚Р°
 
     real(wp), parameter :: pme  = 9.11e-28_wp
     real(wp), parameter :: pme_e  = 9.11e-28

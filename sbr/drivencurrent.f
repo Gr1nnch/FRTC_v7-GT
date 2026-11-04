@@ -20,7 +20,7 @@
 ! NA1     Edge grid point number: ROC=RHO(NA1)
 ! GP2     2*Pi
           call my_timer%start('lhcd/drivencurrent_time.dat', time)
-          call driven_current(outj, sigmaj, UPL, NRD, NA1, TIME, TAU, 
+          call drivencurrent95(outj, sigmaj, UPL, NRD, NA1, TIME, TAU, 
      & ROC, RTOR, GP2)
              
             
@@ -30,14 +30,14 @@
         end    
 
         double precision function aiint(arr,yr)
-        ! aiint:	integral {0,r} of current density
-        ! 	aiint=integral {0,r} (arr/ipol**2)dv*ipol/(gp2*ro)
-        ! 	only radial dependent array may be a parameter of the function
-        ! 	examples:
-        !    out_iint(cu)	!radial profile of toroidal current
+        ! aiint:    integral {0,r} of current density
+        !      aiint=integral {0,r} (arr/ipol**2)dv*ipol/(gp2*ro)
+        !      only radial dependent array may be a parameter of the function
+        !      examples:
+        !    out_iint(cu)     !radial profile of toroidal current
         !    out_iint(cd,ro)    !toroidal driven current inside {0,ro}
         !    out_iint(cub)      !total toroidal current =iint(cu,roc); (=ipl)
-        !			(pereverzev 23-oct-99)
+        !           (pereverzev 23-oct-99)
 ! NA        = NA1-1
 ! RHO(*)    main magnetic surface label
 ! IPOL(*)   normalized poloidal current

@@ -4,7 +4,7 @@ module source_new_mod
     real(wp) :: rsou(102),sou(102)
     integer  :: npta
     !!common /asou/ rsou(102),sou(102),npta
-    !! используется в source_new и ourlhcd2017
+    !! РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ source_new Рё ourlhcd2017
 
 contains
 

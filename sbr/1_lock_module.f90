@@ -5,8 +5,8 @@ module lock_module
 contains
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     subroutine linf(x,y,t,fout,klo,khi)
-        !! линейная аппроксимация
-        !! TODO будет удобнее если переделать в функцию
+        !! Р»РёРЅРµР№РЅР°СЏ Р°РїРїСЂРѕРєСЃРёРјР°С†РёСЏ
+        !! TODO Р±СѓРґРµС‚ СѓРґРѕР±РЅРµРµ РµСЃР»Рё РїРµСЂРµРґРµР»Р°С‚СЊ РІ С„СѓРЅРєС†РёСЋ
         implicit none
         real(wp), intent(in)  :: x(*),y(*), t
         real(wp), intent(out) :: fout
@@ -17,7 +17,7 @@ contains
     end
 
     subroutine lock(xa,n,x,klo,khi,ierr)
-        !! что делает?
+        !! С‡С‚Рѕ РґРµР»Р°РµС‚?
         implicit none
         real(wp),   intent(in) :: xa(*), x
         integer,    intent(in) :: n
@@ -48,7 +48,7 @@ contains
     end
 
     subroutine lock2(xa,n,x,klo,khi,ierr)
-        !! что делает
+        !! С‡С‚Рѕ РґРµР»Р°РµС‚
         use constants, only: zero
         implicit none
         real(wp),   intent(in) :: xa(*), x

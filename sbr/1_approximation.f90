@@ -170,7 +170,7 @@ subroutine lubksb(a,n,np,indx,b)
 end    
 
     function fdf(x, c, n, df) result(p)
-        !! вычисление значения полинома и его производной
+        !! РІС‹С‡РёСЃР»РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РїРѕР»РёРЅРѕРјР° Рё РµРіРѕ РїСЂРѕРёР·РІРѕРґРЅРѕР№
         real(wp), intent(in)  :: x
         real(wp), intent(in)  :: c(n)
         integer,  intent(in)  :: n
@@ -187,7 +187,7 @@ end
     end
 
 real(wp) function fdfddf(x,c,n,df,ddf)
-    !! вычисление значения полинома и первой и второй производной
+    !! РІС‹С‡РёСЃР»РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ РїРѕР»РёРЅРѕРјР° Рё РїРµСЂРІРѕР№ Рё РІС‚РѕСЂРѕР№ РїСЂРѕРёР·РІРѕРґРЅРѕР№
     real(wp), intent(in)   :: x
     real(wp), intent(in)   :: c(n)
     integer,  intent(in)   :: n 
