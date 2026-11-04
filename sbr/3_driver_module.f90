@@ -693,6 +693,7 @@ contains
         real(wp)  :: eps1, rbord1, hdid, xold, h ,rmm
         real(wp)  :: hdrob1, pdec14zz, pdec24zz, pdec34zz
         integer   :: ipr1, iat, i, ii, nstp
+        integer :: ierr
         ipr1=0
         iat=0
         x=zero
@@ -802,7 +803,16 @@ contains
             if (y(3)*irs.lt.rmm*irs) rmm=y(3)
     30      continue
             
-            call runge_kutta_qs(y, dydx, nvar, x, h, eps1, yscal, hdid, hnext, derivs)
+            call runge_kutta_qs(y, dydx, nvar, x, h, eps1, yscal, hdid, hnext, derivs, ierr)
+            if (ierr.ne.0) then
+                if (ipri.gt.1) then
+                    write(*,*) 'RKQS failed: stepsize underflow'
+                    write(*,*) 'r, theta, Nr = ', y(3), y(1), y(4)
+                end if
+
+                goto 40
+            end if
+            
             if(y(3).ge.1.d0) then  ! crossed plasma boundary
                 do ii=1,nvar
                     y(ii)=yold(ii)

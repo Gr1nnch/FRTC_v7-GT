@@ -71,6 +71,7 @@ contains
                 end if
 
                 powexit = point%power
+                current_trajectory%initial_power = powexit
                 dltpow = pabs
                 call dqliter(dltpow,current_trajectory,hr,powexit,iout)
                 if (iout.eq.0) then

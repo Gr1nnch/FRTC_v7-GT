@@ -70,6 +70,21 @@ contains
         si=bp/b
         co=bt/b
 
+        ! Диагностика направления магнитного поля
+        if (abs(pa-10.5)<0.01 .and. &
+            abs(ptet)<0.01) then
+
+            write(*,*) '---------- FIELD CHECK ----------'
+            write(*,*) 'pa, ptet = ', pa, ptet
+            write(*,*) 'bt = ', bt
+            write(*,*) 'bp = ', bp
+            write(*,*) 'BR = ', bp*dxdt/dsqrt(g22)
+            write(*,*) 'BZ = ', bp*dzdt/dsqrt(g22)
+            write(*,*) 'dxdt, dzdt = ', dxdt, dzdt
+            write(*,*) 'xmy = ', xmy
+            write(*,*) '---------------------------------'
+
+        end if
         !------ calculation of derivatives ------
 
         g11t=two*(dxdr*dxdrdt+dzdr*dzdrdt)
@@ -486,7 +501,10 @@ contains
             pause
             !goto 70
         endif
-          
+        
+        !call calculate_metrics(0.5d0, 0d0)
+        !pause
+
         call calculate_metrics(pa, ptet)
 
         call calculate_dielectric_tensor(pa)

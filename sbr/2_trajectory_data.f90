@@ -30,6 +30,7 @@ module trajectory_data
         integer  :: izn    ! iznzap(itr)
 
         real(wp) :: znakstart
+        real(wp) :: initial_power = 0.d0
         
         integer  :: spectrum_point_index
         integer  :: mbad

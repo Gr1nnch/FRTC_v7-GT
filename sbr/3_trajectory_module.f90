@@ -35,7 +35,7 @@ contains
         integer :: ntry
         real(wp) :: pa, prt, prm, hr 
 
-        real(wp),  parameter :: rhostart=1.d0
+        real(wp),  parameter :: rhostart=1.0d0
         integer,   parameter :: ntry_max=5
         integer :: num_roots
         real(wp) :: xnr_root(4)
@@ -165,7 +165,8 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
     
     real(wp), intent(in) :: tview
     real(wp) :: addx, addz
-
+    real(wp) :: initial_power
+    
     integer, intent(in) :: ispectr, nnz, ntet  !sav#
 
     type(Trajectory) :: traj
@@ -340,7 +341,7 @@ subroutine write_trajectories(tview, ispectr,nnz,ntet) !sav2008
                 end if
 
                         !   R, Z, rho, theta, N_par, N_pol, P_tot,P_land, P_coll, vth,  'slow=1','idir=1','ipow', driver, N_traj 
-                write(1, 7) x, z, xr,  th,    parn,  npoli, pt,   pl,     pc,     vthcg, ifast,   idir, tp%ipow,  tp%driver,  itr
+                write(1, 7) x, z, xr,  th,    parn,  npoli, pow*traj%initial_power,   pl,     pc,     vthcg, ifast,   idir, tp%ipow,  tp%driver,  itr
                 
                 if(pt.ge.1d0-pleft) go to 11 !maximal absorbed power along a ray
             end do

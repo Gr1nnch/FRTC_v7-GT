@@ -47,7 +47,7 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
         real(wp), value :: e, v_lim, v(:), f(:)
         integer  :: n
         real(wp) :: h
-        real(wp), parameter :: h0 = 0.01d0
+        real(wp), parameter :: h0 = 0.1d0
         !this%inst_field1 = cmplx(0.,0.) 
         this%enorm     = abs(e)
         this%v_lim = v_lim
@@ -221,40 +221,40 @@ module FokkerPlanck1D_mod ! the module name defines the namespace
         case (0)
             !if(time.gt.0.303)then 
                 if(nomer.eq.67)then
-                    open(74, file='ybegd67.dat',status='old')
-                    do i=1, this%n+1
-                        read(74,*) fff, this%d1(i),this%d2(i),this%d3(i)
-                    end do
-                    close(74)
+                    !open(74, file='ybegd67.dat',status='old')
+                    !do i=1, this%n+1
+                    !    read(74,*) fff, this%d1(i),this%d2(i),this%d3(i)
+                    !end do
+                    !close(74)
 
                 end if
             !end if
             if(time.gt.0.3005)then 
-                if(nomer.eq.67)then
-                    open(74, file='lhcd/out/ybegd0.dat')
-                    do i=1, this%n+1
-                        write(74,*) y(i), this%d1(i),this%d2(i),this%d3(i)
-                    end do
-                    close(74)
+                !if(nomer.eq.67)then
+                !    open(74, file='lhcd/out/ybegd0.dat')
+                !    do i=1, this%n+1
+                !        write(74,*) y(i), this%d1(i),this%d2(i),this%d3(i)
+                !    end do
+                !    close(74)
 
-                end if
+               ! end if
             end if
             call savelyev_solver(this%alfa2, nt, this%h, dt, this%n, ybeg, yend, this%d1, this%d2, this%d3, y)
             if(time.gt.0.3005)then
-                if(nomer.eq.67)then
-                    open(74, file='lhcd/out/yend.dat')
-                    do i=1, this%n+1
-                        write(74,*) y(i), this%d1(i),this%d2(i),this%d3(i)
-                    end do
-                    close(74)
-                    open(74, file='lhcd/out/nthdt.dat',position="append")
-                    do i=1, this%n+1
-                        write(74,*) nt, this%h,dt,this%n
-                    end do
-                    close(74)
-                    write(*,*)'time=',time
-                    PAUSE
-                end if
+                !if(nomer.eq.67)then
+                !   open(74, file='lhcd/out/yend.dat')
+                !    do i=1, this%n+1
+                !        write(74,*) y(i), this%d1(i),this%d2(i),this%d3(i)
+                !    end do
+                !    close(74)
+                !    open(74, file='lhcd/out/nthdt.dat',position="append")
+                !    do i=1, this%n+1
+                !        write(74,*) nt, this%h,dt,this%n
+                !    end do
+                !    close(74)
+                !    write(*,*)'time=',time
+                !    PAUSE
+                !end if
             end if
         case (1)
             call chang_cooper_solver(this%alfa2, nt, this%h, dt, this%n, ybeg, yend, this%d1,this%d2,this%d3, y)

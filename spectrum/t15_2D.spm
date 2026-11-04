@@ -3,7 +3,7 @@
   "comment": "t15pam4rbox_2D_correct.dat",
   "spectrum": {
     "kind": "scatter_spectrum",
-    "source": "t15pam4rbox_2D_correct.dat",
+    "source": "globgel500cut.dat",
     "coordinate_system": 0,
     "angle": 0.0,
     "PWM": true

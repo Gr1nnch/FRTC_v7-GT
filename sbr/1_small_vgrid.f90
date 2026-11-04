@@ -105,7 +105,7 @@ contains
             stop
         else if(ierr.eq.2) then !vz > vgrid(nvpt,j)
             !write(*,*)'exception: ierr=2 in distr()'
-            print *, 'vz > vgrid(nvpt,j)'
+            !print *, 'vz > vgrid(nvpt,j)'
             ifound=nvp
             vlf=vzj(nvp)
             vrt=vz

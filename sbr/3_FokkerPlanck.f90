@@ -18,7 +18,7 @@ subroutine fokkerplanck_compute(time, TAU)
     real(wp) t, dtstep, dtau
     integer, parameter :: ntau = 10
     integer n,i,j,it,nt,k
-    real(wp) xend,h,dt
+    real(wp) xend,h,dt,vcls
     real(wp) znak,alfa2,dt0,h0,r
     real(wp), save  :: last_time_saving = 0
     parameter(dt0=0.1d0,h0=0.1d0)
@@ -58,9 +58,37 @@ subroutine fokkerplanck_compute(time, TAU)
                 !call fokkerplanck1D_iter(alfa2, h, n, dt, nt, xend, d1, d2, d3, vij(:,j), fij(:,j,k),out_fj, dfij(:,j,k))
             end do
             fij(:,j,k) = fokker_planck%f
+            if(time.gt.0.4004) then
+                do i=1,5010
+                    if(i.eq.1) then
+                        dfij(i,j,k)=0
+                    else if(i.eq.5010) then
+                        dfij(i,j,k)=(fij(i,j,k)-fij(i-1,j,k))/vij(2,j)
+                    else
+                        dfij(i,j,k)=0.5d0*(fij(i+1,j,k)-fij(i-1,j,k))/vij(2,j)
+                    end if
+                end do
+            end if
             !call fokker_planck%eval_f_derivate(dfij(:,j,k))
         end do
     end do
+
+    !if(time.gt.4003) then
+        open(43,file='lhcd/FD.dat',position="append")
+        do k=1,2
+            do j=1,nr
+                r=dble(j)/dble(nr+1)
+                do i=1,5010
+                    vcls=vij(i,j)*fvt(r)/3.d10
+                    write(43,89)vcls,vij(i,j),fij(i,j,k),fij0(i,j,k),dij(i,j,k)
+                end do
+            end do
+        end do
+        close(43)
+    !end if
+    !pause
+89    format(1x,1x,10(e14.7,1x))
+
 
     write(*,*)'fokkerplanck nr= ', nr, ' ntau =', ntau, 'nt =', nt
     if ((time - last_time_saving)>=save_interval) then

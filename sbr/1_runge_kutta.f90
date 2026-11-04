@@ -132,7 +132,7 @@ contains
     !sav2008: below this line there are new subroutins and functions
 
     ! пришлось переименовать из rkqs - почему-то криво линковался
-    subroutine runge_kutta_qs(y, dydx, n, x, htry, eps, yscal, hdid, hnext, derivs)
+    subroutine runge_kutta_qs(y, dydx, n, x, htry, eps, yscal, hdid, hnext, derivs, ierr)
         !! метод рунге-кутта         
         implicit none
         real(wp), intent(inout)  :: y(n)
@@ -142,6 +142,7 @@ contains
         real(wp), intent(in)     :: htry, eps
         real(wp), intent(in)     :: yscal(n)
         real(wp), intent(inout)  :: hdid, hnext
+        integer, intent(out) :: ierr
 
         procedure(Iderivs_func) :: derivs
         !external derivs
@@ -154,6 +155,7 @@ contains
         real(wp)  :: xsav
         real(wp)  :: h, htemp, errmax, xnew
 
+        ierr = 0
         h=htry
   1     call rkck(y, dydx, n, x, h, ytemp, yerr, derivs)
         errmax=0.d0
@@ -165,7 +167,17 @@ contains
             htemp=safety*h*(errmax**pshrnk)
             h=sign(max(abs(htemp),0.1d0*abs(h)),h)
             xnew=x+h
-            if(xnew.eq.x)pause 'stepsize underflow in rkqs'
+            !if(xnew.eq.x)pause 'stepsize underflow in rkqs'
+            if (xnew.eq.x) then
+                write(*,*) 'RKQS UNDERFLOW'
+                write(*,*) 'x, h, eps = ', x, h, eps
+                write(*,*) 'y = ', y
+                write(*,*) 'dydx = ', dydx
+                write(*,*) 'yscal = ', yscal
+                !pause 'stepsize underflow in rkqs'
+                ierr = 1
+                return
+            end if
             goto 1
         else
             if(errmax.gt.errcon)then
